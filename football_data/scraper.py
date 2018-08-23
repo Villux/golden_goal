@@ -27,6 +27,13 @@ def read_csv(address):
         'PH': 'PSH',
         'PD': 'PSD',
         'PA': 'PSA'})
+
+    if len(df["Date"].iloc[0]) > 8:
+        df["Date"] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
+    else:
+        df["Date"] = pd.to_datetime(df['Date'], format='%d/%m/%y')
+
+    df["Date"] = df["Date"].dt.strftime('%Y-%m-%d')
     return df
 
 def run():
