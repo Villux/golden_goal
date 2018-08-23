@@ -1,4 +1,3 @@
-import logging
 from multiprocessing import Pool, cpu_count
 import numpy as np
 import pandas as pd
@@ -6,6 +5,7 @@ import pandas as pd
 from sofifa.utils import get_page, build_url, RedirectException
 from sofifa.parser import get_data_update_query_strings, parse_player_data
 from services import player
+from logger import get_logger
 
 def get_player_data(url):
     try:
@@ -14,23 +14,7 @@ def get_player_data(url):
     except RedirectException:
         return False
 
-formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
-
-stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.INFO)
-stream_handler.setFormatter(formatter)
-
-file_handler = logging.FileHandler("scraper.log")
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(formatter)
-
-logging.basicConfig(
-    format=formatter,
-    level=logging.DEBUG,
-    handlers=[
-        stream_handler,
-        file_handler
-    ])
+logging = get_logger()
 
 number_of_cores = cpu_count()
 players_per_page = 50
