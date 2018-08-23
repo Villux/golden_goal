@@ -9,9 +9,9 @@ def insert(conn, **kwargs):
     execute_statement((query, values), conn)
     return execute_statement("select last_insert_rowid()", conn)
 
-def update_by_id(fifa_id, conn, **kwargs):
+def update_by_fifa_id_and_date(fifa_id, date, conn, **kwargs):
     set_text = build_update_query_set(kwargs)
-    query = f"UPDATE player_table SET {set_text} WHERE fifa_id={fifa_id};"
+    query = f"UPDATE player_table SET {set_text} WHERE fifa_id={fifa_id} AND date='{date}';"
     execute_statement((query, get_value_tuple(kwargs)), conn)
 
 def get_existing_indexes(indexes, date, conn):

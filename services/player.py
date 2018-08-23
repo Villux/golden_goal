@@ -9,7 +9,7 @@ def insert_players(df, conn):
 
 def update_players(df, conn):
     for idx, record in df.to_dict('index').items():
-        pt.update_by_id(idx, conn, **record)
+        pt.update_by_fifa_id_and_date(idx, record["date"], conn, **record)
 
 def insert_or_update_player_data(player_data, date):
     conn = open_connection()

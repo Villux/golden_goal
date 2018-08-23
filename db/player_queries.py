@@ -1,6 +1,7 @@
 create_query = '''
     CREATE TABLE IF NOT EXISTS "player_table" (
-  "fifa_id" INTEGER PRIMARY KEY,
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "fifa_id" INTEGER,
   "DEF" INTEGER,
   "DRI" INTEGER,
   "PAC" INTEGER,
@@ -75,6 +76,6 @@ create_query = '''
 );
 '''
 
-create_index = "CREATE INDEX player_index ON player_table (fifa_id);"
+create_index = "CREATE INDEX player_index ON player_table (id);"
 
 drop_query = "DROP TABLE IF EXISTS player_table;"
