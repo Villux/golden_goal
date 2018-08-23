@@ -1,4 +1,5 @@
 import hashlib
+import pandas as pd
 
 from db.interface import execute_statement, fetchall
 from db.helper import get_value_tuple, build_insert_query, build_update_query_set
@@ -15,4 +16,10 @@ def insert(conn, **kwargs):
     execute_statement((query, values), conn)
     return execute_statement("select last_insert_rowid()", conn)
 
+def get_mutual_matches_between_dates(team, start, end, conn):
+    query = f"select * \
+        from match_table \
+        where Date > '{start}' AND Date < '{end}' AND \
+        (HomeTeam='{team}' OR AwayTeam='{team}');"
 
+    return pd.read_sql(query, conn)
