@@ -1,4 +1,5 @@
 from db import player_queries as pq
+from db import match_queries as mq
 from db.interface import execute_statement, open_connection, close_connection
 
 if __name__ == "__main__":
@@ -6,4 +7,8 @@ if __name__ == "__main__":
     execute_statement(pq.drop_query, conn)
     execute_statement(pq.create_query, conn)
     execute_statement(pq.create_index, conn)
+
+    execute_statement(mq.drop_query, conn)
+    execute_statement(mq.create_query, conn)
+    execute_statement(mq.create_index, conn)
     close_connection(conn)

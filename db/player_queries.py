@@ -71,7 +71,7 @@ create_query = '''
   "wage" TEXT,
   "week_foot" INTEGER,
   "weight" INTEGER,
-  "date" TEXT,
+  "date" TIMESTAMP,
   "query_string" TEXT
 );
 '''
