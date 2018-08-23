@@ -11,10 +11,10 @@ def update_players(df, conn):
     for idx, record in df.to_dict('index').items():
         pt.update_by_id(idx, conn, **record)
 
-def insert_or_update_player_data(player_data):
+def insert_or_update_player_data(player_data, date):
     conn = open_connection()
 
-    existing_idx = pt.get_existing_indexes(player_data.index.values, conn)
+    existing_idx = pt.get_existing_indexes(player_data.index.values, date, conn)
     existing_df = player_data.loc[existing_idx]
     new_idx = np.setdiff1d(player_data.index.values, existing_df.index.values)
     new_df = player_data.loc[new_idx]

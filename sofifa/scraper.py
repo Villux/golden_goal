@@ -71,7 +71,7 @@ def run():
             df["query_string"] = query_string
             df = df.set_index("fifa_id")
 
-            player.insert_or_update_player_data(df)
+            player.insert_or_update_player_data(df, date)
 
             offset = offset_list[-1]
 
