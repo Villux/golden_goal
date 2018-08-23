@@ -1,4 +1,3 @@
-import argparse
 import logging
 from multiprocessing import Pool, cpu_count
 import numpy as np
@@ -6,8 +5,6 @@ import pandas as pd
 
 from sofifa.utils import get_page, build_url, RedirectException
 from sofifa.parser import get_data_update_query_strings, parse_player_data
-from db.interface import open_connection, close_connection
-from db import player_table as pt
 from services import player
 
 def get_player_data(url):
