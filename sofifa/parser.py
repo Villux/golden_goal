@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from urllib import parse
 
-from utils import get_integeres_from_text
+from sofifa.utils import get_integeres_from_text
 
 class DateNotUniqueException(Exception):
     pass
@@ -35,117 +35,127 @@ def get_player_rows(bs):
     table = bs.findAll('table', {'class': 'table table-hover persist-area'})[0]
     tbody = table.findAll('tbody')[0]
     player_rows = tbody.findChildren(["tr"])
-    return player_rows
+    return player_rows[0:-1]
+
+def int_or_none(value):
+    if value.isdigit():
+        return int(value)
+    return None
+
+def string_or_none(value):
+    if value == "N/A":
+        return None
+    return str(value)
 
 def get_general(cols):
     data = {}
     a_elems = cols[0].findChildren(["a"])
-    data["nationality"] = a_elems[0]["title"]
-    data["name"] = a_elems[1]["title"]
-    data["position"] = [elem.span.get_text() for elem in cols[0].div.div.findChildren(["a"])]
-    data["age"] = int(cols[1].div.get_text())
-    data["overall_rating"] = int(get_divspan(cols[2]))
-    data["potential"] = int(get_divspan(cols[3]))
-    data["club"] = cols[4].div.a.get_text()
+    data["nationality"] = string_or_none(a_elems[0]["title"])
+    data["name"] = string_or_none(a_elems[1]["title"])
+    data["position"] = string_or_none(','.join([elem.span.get_text() for elem in cols[0].div.div.findChildren(["a"])]))
+    data["age"] = int_or_none(cols[1].div.get_text())
+    data["overall_rating"] = int_or_none(get_divspan(cols[2]))
+    data["potential"] = int_or_none(get_divspan(cols[3]))
+    data["club"] = string_or_none(cols[4].div.a.get_text())
     return data
 
 def get_basic(cols):
     data = {}
-    data["fifa_id"] = int(cols[0].div.get_text())
-    data["height"] = int(get_integeres_from_text(cols[1].div.get_text()))
-    data["weight"] = int(get_integeres_from_text(cols[2].div.get_text()))
-    data["foot"] = cols[3].div.get_text()
-    data["growth"] = int(cols[4].div.get_text())
-    data["joined"] = cols[5].div.get_text()
-    data["loan_date_end"] = cols[6].div.get_text()
-    data["value"] = cols[7].div.get_text()
-    data["wage"] = cols[8].div.get_text()
-    data["release_clause"] = cols[9].div.get_text()
+    data["fifa_id"] = int_or_none(cols[0].div.get_text())
+    data["height"] = int_or_none(get_integeres_from_text(cols[1].div.get_text()))
+    data["weight"] = int_or_none(get_integeres_from_text(cols[2].div.get_text()))
+    data["foot"] = string_or_none(cols[3].div.get_text())
+    data["growth"] = int_or_none(cols[4].div.get_text())
+    data["joined"] = string_or_none(cols[5].div.get_text())
+    data["loan_date_end"] = string_or_none(cols[6].div.get_text())
+    data["value"] = string_or_none(cols[7].div.get_text())
+    data["wage"] = string_or_none(cols[8].div.get_text())
+    data["release_clause"] = string_or_none(cols[9].div.get_text())
     return data
 
 def get_attacking(cols):
     data = {}
-    data["total_attacking"] = int(cols[0].div.get_text())
-    data["crossing"] = int(get_divspan(cols[1]))
-    data["finishing"] = int(get_divspan(cols[2]))
-    data["heading_accuracy"] = int(get_divspan(cols[3]))
-    data["short_passing"] = int(get_divspan(cols[4]))
-    data["volleys"] = int(get_divspan(cols[5]))
+    data["total_attacking"] = int_or_none(cols[0].div.get_text())
+    data["crossing"] = int_or_none(get_divspan(cols[1]))
+    data["finishing"] = int_or_none(get_divspan(cols[2]))
+    data["heading_accuracy"] = int_or_none(get_divspan(cols[3]))
+    data["short_passing"] = int_or_none(get_divspan(cols[4]))
+    data["volleys"] = int_or_none(get_divspan(cols[5]))
     return data
 
 def get_skill(cols):
     data = {}
-    data["total_skill"] = int(cols[0].div.get_text())
-    data["dribbling"] = int(get_divspan(cols[1]))
-    data["curve"] = int(get_divspan(cols[2]))
-    data["fk_accuracy"] = int(get_divspan(cols[3]))
-    data["long_passing"] = int(get_divspan(cols[4]))
-    data["ball_control"] = int(get_divspan(cols[5]))
+    data["total_skill"] = int_or_none(cols[0].div.get_text())
+    data["dribbling"] = int_or_none(get_divspan(cols[1]))
+    data["curve"] = int_or_none(get_divspan(cols[2]))
+    data["fk_accuracy"] = int_or_none(get_divspan(cols[3]))
+    data["long_passing"] = int_or_none(get_divspan(cols[4]))
+    data["ball_control"] = int_or_none(get_divspan(cols[5]))
     return data
 
 def get_movement(cols):
     data = {}
-    data["total_movement"] = int(cols[0].div.get_text())
-    data["acceleration"] = int(get_divspan(cols[1]))
-    data["sprint_speed"] = int(get_divspan(cols[2]))
-    data["agility"] = int(get_divspan(cols[3]))
-    data["reactions"] = int(get_divspan(cols[4]))
-    data["balance"] = int(get_divspan(cols[5]))
+    data["total_movement"] = int_or_none(cols[0].div.get_text())
+    data["acceleration"] = int_or_none(get_divspan(cols[1]))
+    data["sprint_speed"] = int_or_none(get_divspan(cols[2]))
+    data["agility"] = int_or_none(get_divspan(cols[3]))
+    data["reactions"] = int_or_none(get_divspan(cols[4]))
+    data["balance"] = int_or_none(get_divspan(cols[5]))
     return data
 
 def get_power(cols):
     data = {}
-    data["total_power"] = int(cols[0].div.get_text())
-    data["shot_power"] = int(get_divspan(cols[1]))
-    data["jumping"] = int(get_divspan(cols[2]))
-    data["stamina"] = int(get_divspan(cols[3]))
-    data["strength"] = int(get_divspan(cols[4]))
-    data["long_shots"] = int(get_divspan(cols[5]))
+    data["total_power"] = int_or_none(cols[0].div.get_text())
+    data["shot_power"] = int_or_none(get_divspan(cols[1]))
+    data["jumping"] = int_or_none(get_divspan(cols[2]))
+    data["stamina"] = int_or_none(get_divspan(cols[3]))
+    data["strength"] = int_or_none(get_divspan(cols[4]))
+    data["long_shots"] = int_or_none(get_divspan(cols[5]))
     return data
 
 def get_mentality(cols):
     data = {}
-    data["total_mentality"] = int(cols[0].div.get_text())
-    data["aggression"] = int(get_divspan(cols[1]))
-    data["interceptions"] = int(get_divspan(cols[2]))
-    data["positioning"] = int(get_divspan(cols[3]))
-    data["vision"] = int(get_divspan(cols[4]))
-    data["penalties"] = int(get_divspan(cols[5]))
-    data["composure"] = int(get_divspan(cols[6]))
+    data["total_mentality"] = int_or_none(cols[0].div.get_text())
+    data["aggression"] = int_or_none(get_divspan(cols[1]))
+    data["interceptions"] = int_or_none(get_divspan(cols[2]))
+    data["positioning"] = int_or_none(get_divspan(cols[3]))
+    data["vision"] = int_or_none(get_divspan(cols[4]))
+    data["penalties"] = int_or_none(get_divspan(cols[5]))
+    data["composure"] = int_or_none(get_divspan(cols[6]))
     return data
 
 def get_defending(cols):
     data = {}
-    data["total_defending"] = int(cols[0].div.get_text())
-    data["marking"] = int(get_divspan(cols[1]))
-    data["standing_tackle"] = int(get_divspan(cols[2]))
-    data["sliding_tackle"] = int(get_divspan(cols[3]))
+    data["total_defending"] = int_or_none(cols[0].div.get_text())
+    data["marking"] = int_or_none(get_divspan(cols[1]))
+    data["standing_tackle"] = int_or_none(get_divspan(cols[2]))
+    data["sliding_tackle"] = int_or_none(get_divspan(cols[3]))
     return data
 
 def get_goalkeeping(cols):
     data = {}
-    data["total_goalkeeping"] = int(cols[0].div.get_text())
-    data["gk_diving"] = int(get_divspan(cols[1]))
-    data["gk_handling"] = int(get_divspan(cols[2]))
-    data["gk_kicking"] = int(get_divspan(cols[3]))
-    data["gk_positioning"] = int(get_divspan(cols[4]))
-    data["gk_reflexes"] = int(get_divspan(cols[5]))
+    data["total_goalkeeping"] = int_or_none(cols[0].div.get_text())
+    data["gk_diving"] = int_or_none(get_divspan(cols[1]))
+    data["gk_handling"] = int_or_none(get_divspan(cols[2]))
+    data["gk_kicking"] = int_or_none(get_divspan(cols[3]))
+    data["gk_positioning"] = int_or_none(get_divspan(cols[4]))
+    data["gk_reflexes"] = int_or_none(get_divspan(cols[5]))
     return data
 
 def get_special(cols):
     data = {}
-    data["total"] = int(cols[0].div.get_text())
-    data["week_foot"] = int(cols[1].div.get_text())
-    data["skill_moves"] = int(cols[2].div.get_text())
-    data["attacking_work_rate"] = cols[3].div.get_text()
-    data["defensive_work_rate"] = cols[4].div.get_text()
-    data["international_reputation"] = int(cols[5].div.get_text())
-    data["PAC"] = int(get_divspan(cols[6]))
-    data["SHO"] = int(get_divspan(cols[7]))
-    data["PAS"] = int(get_divspan(cols[8]))
-    data["DRI"] = int(get_divspan(cols[9]))
-    data["DEF"] = int(get_divspan(cols[10]))
-    data["PHY"] = int(get_divspan(cols[11]))
+    data["total"] = int_or_none(cols[0].div.get_text())
+    data["week_foot"] = int_or_none(cols[1].div.get_text())
+    data["skill_moves"] = int_or_none(cols[2].div.get_text())
+    data["attacking_work_rate"] = string_or_none(cols[3].div.get_text())
+    data["defensive_work_rate"] = string_or_none(cols[4].div.get_text())
+    data["international_reputation"] = int_or_none(cols[5].div.get_text())
+    data["PAC"] = int_or_none(get_divspan(cols[6]))
+    data["SHO"] = int_or_none(get_divspan(cols[7]))
+    data["PAS"] = int_or_none(get_divspan(cols[8]))
+    data["DRI"] = int_or_none(get_divspan(cols[9]))
+    data["DEF"] = int_or_none(get_divspan(cols[10]))
+    data["PHY"] = int_or_none(get_divspan(cols[11]))
     return data
 
 def get_player_data(player):
