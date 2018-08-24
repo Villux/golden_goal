@@ -6,6 +6,7 @@ from sofifa.utils import get_page, build_url, RedirectException
 from sofifa.parser import get_data_update_query_strings, parse_player_data
 from services import player
 from logger import get_logger
+from db.interface import open_connection, close_connection
 
 def get_player_data(url):
     try:
@@ -22,6 +23,7 @@ players_per_page = 50
 player_url = "https://sofifa.com/players"
 
 def run():
+    conn = open_connection()
     bs = get_page(player_url)
     dates = get_data_update_query_strings(bs)
     logging.debug(f'Got {len(dates)} dates')
@@ -52,9 +54,11 @@ def run():
             df["query_string"] = query_string
             df = df.set_index("fifa_id")
 
-            player.insert_or_update_player_data(df, date)
+            player.insert_or_update_player_data(df, date, conn)
+            conn.commit()
 
             offset = offset_list[-1]
+    close_connection(conn)
 
 if __name__ == "__main__":
     run()

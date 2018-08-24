@@ -3,6 +3,7 @@ import requests
 
 from logger import logging
 from services import match
+from db.interface import open_connection, close_connection
 
 url = "http://www.football-data.co.uk/mmz4281/"
 
@@ -37,6 +38,7 @@ def read_csv(address):
     return df
 
 def run():
+    conn = open_connection()
     for year_tag in years_tags:
         logging.info(f"Reading football data for year tag {year_tag}")
 
@@ -52,7 +54,9 @@ def run():
                     f.write(csv_file)
                 df = read_csv("tmp.csv")
 
-            match.insert_matches(df)
+            match.insert_matches(df, conn)
+            conn.commit()
+    close_connection(conn)
 
 if __name__ == "__main__":
     run()
