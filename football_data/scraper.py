@@ -1,9 +1,12 @@
 import pandas as pd
+import numpy as np
 import requests
 
 from logger import logging
 from services import match
 from db.interface import open_connection, close_connection
+from db import division_table as dt
+from db import season_table as st
 
 url = "http://www.football-data.co.uk/mmz4281/"
 
@@ -39,11 +42,15 @@ def read_csv(address):
 
 def run():
     conn = open_connection()
+
+    div_ids = dt.insert_divisions_by_tags(dt.ENGLAND, conn=conn)
+    data_tags = dt.get_tags_for_ids(div_ids, conn=conn)
+
     for year_tag in years_tags:
         logging.info(f"Reading football data for year tag {year_tag}")
 
-        for serie in ["E0", "E1", "E2", "E3"]:
-            csv_url = f"{url}{year_tag}/{serie}.csv"
+        for division_id, division_tag in zip(div_ids, data_tags):
+            csv_url = f"{url}{year_tag}/{division_tag}.csv"
             try:
                 df = read_csv(csv_url)
             except UnicodeDecodeError:
@@ -54,7 +61,11 @@ def run():
                     f.write(csv_file)
                 df = read_csv("tmp.csv")
 
-            match.insert_matches(df, conn)
+            df = df.dropna(thresh=10)
+            start_date = df["Date"].replace(["NaN", 'NaT'], np.nan).dropna().min()
+            end_date = df["Date"].replace(["NaN", 'NaT'], np.nan).dropna().max()
+            st_id = st.insert(division_id, year_tag, start_date, end_date, conn=conn)
+            match.insert_matches(df, st_id, conn=conn)
             conn.commit()
     close_connection(conn)
 

@@ -2,10 +2,11 @@ import hashlib
 import pandas as pd
 
 from db import helper as dbh
+from db.interface import fetchall
 
 table_name = 'match_table'
 
-VALID_KEYS = ["id","Div","Date","HomeTeam","AwayTeam","FTHG","FTAG","FTR","HTHG","HTAG",
+VALID_KEYS = ["id", "season_id", "Date","HomeTeam","AwayTeam","FTHG","FTAG","FTR","HTHG","HTAG",
               "HTR","Referee","Home_Team_Shots","Away_Team_Shots","HST","AST","HF","AF",
               "HC","AC","HY","AY","HR","AR","Attendance","HHW","AHW","HO","AO","HBP","ABP"]
 
@@ -31,3 +32,12 @@ def get_n_latest_matches_before_date(team, date, N, conn, hometeam=True):
 
 def insert(conn, **kwargs):
     return dbh.insert(table_name, conn, **kwargs)
+
+def get_teams(division, conn):
+    query = f"SELECT DISTINCT HomeTeam, AwayTeam FROM match_table where Div='{division}';"
+    result = fetchall(query, conn)
+    return [r[0] for r in result]
+
+def get_matches(conn, asc=True):
+    query = f"SELECT * FROM match_table order by date {'asc' if asc else 'desc'};"
+    return pd.read_sql(query, conn)

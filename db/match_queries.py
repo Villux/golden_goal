@@ -1,7 +1,7 @@
 create_query = '''
     CREATE TABLE IF NOT EXISTS "match_table" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-        "Div" TEXT,
+        "season_id" INTEGER,
         "Date" TIMESTAMP,
         "HomeTeam" TEXT,
         "AwayTeam" TEXT,
@@ -31,6 +31,7 @@ create_query = '''
         "AO" INTEGER,
         "HBP" INTEGER,
         "ABP" INTEGER,
+        FOREIGN KEY(season_id) REFERENCES season_table(id),
         CONSTRAINT UC_match UNIQUE (HomeTeam,AwayTeam,Date)
     );
 '''
