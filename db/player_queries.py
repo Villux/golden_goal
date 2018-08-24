@@ -77,5 +77,7 @@ create_query = '''
 '''
 
 create_index = "CREATE INDEX player_index ON player_table (id);"
+create_fifa_index = "CREATE INDEX date_id_index ON player_table (date);"
+create_date_index = "CREATE INDEX date_id_index ON player_table (date);"
 
 drop_query = "DROP TABLE IF EXISTS player_table;"
