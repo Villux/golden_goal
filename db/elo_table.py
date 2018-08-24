@@ -1,13 +1,10 @@
 from db.interface import execute_statement, fetchone
-from db.helper import get_value_tuple, build_insert_query
+from db import helper as dbh
 
 table_name = "elo_table"
 
 def insert(conn, **kwargs):
-    query = build_insert_query(kwargs, table_name)
-    values = get_value_tuple(kwargs)
-    execute_statement((query, values), conn)
-    return execute_statement("select last_insert_rowid()", conn)
+    return dbh.insert(table_name, conn, **kwargs)
 
 def select_latest_for_team(team, date, conn):
     query = 'SELECT elo, id FROM elo_table WHERE team=? AND date < ? ORDER BY date DESC;'

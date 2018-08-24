@@ -1,18 +1,15 @@
 from db.interface import execute_statement, fetchall
-from db.helper import get_value_tuple, build_insert_query, build_update_query_set
+from db import helper as dbh
 
 table_name = 'player_table'
 
 def insert(conn, **kwargs):
-    query = build_insert_query(kwargs, table_name)
-    values = get_value_tuple(kwargs)
-    execute_statement((query, values), conn)
-    return execute_statement("select last_insert_rowid()", conn)
+    return dbh.insert(table_name, conn, **kwargs)
 
 def update_by_fifa_id_and_date(fifa_id, date_id, conn, **kwargs):
-    set_text = build_update_query_set(kwargs)
+    set_text = dbh.build_update_query_set(kwargs)
     query = f"UPDATE player_table SET {set_text} WHERE fifa_id={fifa_id} AND date='{date_id}';"
-    execute_statement((query, get_value_tuple(kwargs)), conn)
+    execute_statement((query, dbh.get_value_tuple(kwargs)), conn)
 
 def get_existing_indexes(indexes, date_id, conn):
     id_list = ','.join(str(x) for x in indexes)
