@@ -1,10 +1,12 @@
-from db.elo_table import attach_match_to_elo, insert, select_latest_for_team
+from db import elo_table as et, season_table as st
 from db.interface import open_connection, close_connection
+
+INITIAL_ELO = 1500
 
 def expected(A, B):
     return 1 / (1 + 10 ** ((B - A) / 400))
 
-def elo(old, exp, score, K):
+def calculate_elo(old, exp, score, K):
     return old + K * (score - exp)
 
 def get_new_elo(A, B, goals_A, goals_B, K):
@@ -22,9 +24,9 @@ def get_new_elo(A, B, goals_A, goals_B, K):
         score = 0.5
     else:
         score = 0
-    return elo(A, expected(A, B), score, K)
+    return calculate_elo(A, expected(A, B), score, K)
 
-def get_elo_after_match(elo_A, elo_B, goals_A, goals_B):
+def get_elo_from_result(elo_A, elo_B, goals_A, goals_B):
     K = 40
 
     new_elo_A = get_new_elo(elo_A, elo_B, goals_A, goals_B, K)
@@ -32,29 +34,33 @@ def get_elo_after_match(elo_A, elo_B, goals_A, goals_B):
 
     return new_elo_A, new_elo_B
 
-def get_elo(team, date, conn):
-    return select_latest_for_team(team, date, conn)
+def insert_initial_elo(team, season_id, date, **kwargs):
+    elo_id = insert(team, season_id, date, INITIAL_ELO,  **kwargs)
+    return (INITIAL_ELO, elo_id)
 
-def attach_elo_to_match(match_id, match_date, home_team, away_team, conn):
-    elo_A, id_A = get_elo(home_team, match_date, conn)
-    elo_B, id_B = get_elo(away_team, match_date, conn)
+def get_elo_and_id(team, date, season_id, **kwargs):
+    elo = et.select_latest_for_team(team, date, season_id, **kwargs)
+    if not elo:
+        previous_season_id = st.get_previous_season(season_id, **kwargs)
+        if not previous_season_id:
+            elo = insert_initial_elo(team, season_id, date, **kwargs)
+        else:
+            elo = et.select_latest_for_team(team, date, previous_season_id[0], **kwargs)
+            if not elo:
+                elo = et.select_latest_for_season(previous_season_id[0], **kwargs)
+                if not elo:
+                    elo = insert_initial_elo(team, season_id, date, **kwargs)
+    return elo
 
-    attach_match_to_elo(match_id, id_A, id_B, conn)
-    return elo_A, elo_B
+def insert(team, season_id, date, elo, **kwargs):
+    conn = kwargs["conn"]
+    data = {
+        "date": date,
+        "team": team,
+        "elo": elo,
+        "season_id": season_id
+    }
+    return et.insert(conn, **data)
 
-def update_elo_after_match(date, elo_home, elo_away, home_team, away_team, conn):
-    home_data = {"date": date, "team": home_team, "elo": elo_home}
-    away_data = {"date": date, "team": away_team, "elo": elo_away}
-
-    insert(conn, **home_data)
-    insert(conn, **away_data)
-
-
-def calculate_elo_from_matches(matches):
-    conn = open_connection()
-    for (match_id, date, home_team, away_team, home_score, away_score) in matches:
-        elo_A, elo_B = attach_elo_to_match(match_id, date, home_team, away_team, conn)
-        new_elo_A, new_elo_B = get_elo_after_match(elo_A, elo_B, home_score, away_score)
-        update_elo_after_match(date, new_elo_A, new_elo_B, home_team, away_team, conn)
-
-    close_connection(conn)
+def attach_elo_to_match(match_id, home_elo_id, away_elo_id, **kwargs):
+    et.attach_match_to_elo(match_id, home_elo_id, away_elo_id, **kwargs)
