@@ -22,8 +22,10 @@ def remove_extra_keys(record):
             new_dict[valid_key] = value
     return new_dict
 
-def insert_matches(df, conn):
+def insert_matches(df, season_id, **kwargs):
+    conn = kwargs["conn"]
     for _, record in df.to_dict('index').items():
+        record["season_id"] = season_id
         match_id = mt.insert(conn=conn, **remove_extra_keys(record))
         insert_odds_for_match(record, match_id, conn)
 
