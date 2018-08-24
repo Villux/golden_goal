@@ -1,6 +1,7 @@
 import pandas as pd
 from db.interface import open_connection, close_connection
 from db import match_table as mt
+from services.odds import insert_odds_for_match
 
 HOME = 1
 AWAY = 2
@@ -9,9 +10,18 @@ HOMEAWAY = 3
 def get_id_for_row(row):
     return mt.get_index(row['HomeTeam'], row['AwayTeam'], row["Date"])
 
+def remove_extra_keys(record):
+    new_dict = {}
+    for valid_key in mt.VALID_KEYS:
+        value = record.get(valid_key, None)
+        if value:
+            new_dict[valid_key] = value
+    return new_dict
+
 def insert(df, conn):
     for _, record in df.to_dict('index').items():
-        mt.insert(conn=conn, **record)
+        match_id = mt.insert(conn=conn, **remove_extra_keys(record))
+        insert_odds_for_match(record, match_id, conn)
 
 def insert_matches(df):
     conn = open_connection()
