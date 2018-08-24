@@ -5,6 +5,10 @@ from db import helper as dbh
 
 table_name = 'match_table'
 
+VALID_KEYS = ["id","Div","Date","HomeTeam","AwayTeam","FTHG","FTAG","FTR","HTHG","HTAG",
+              "HTR","Referee","Home_Team_Shots","Away_Team_Shots","HST","AST","HF","AF",
+              "HC","AC","HY","AY","HR","AR","Attendance","HHW","AHW","HO","AO","HBP","ABP"]
+
 def get_index(home_team, away_team, date):
     id_string = f"{home_team}{away_team}{date}".encode()
     return hashlib.md5(id_string).hexdigest()
