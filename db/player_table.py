@@ -1,4 +1,4 @@
-from db.interface import execute_statement, fetchall
+from db.interface import execute_statement, fetchall, fetchone
 from db import helper as dbh
 
 table_name = 'player_table'
@@ -16,3 +16,11 @@ def get_existing_indexes(indexes, date_id, conn):
     query = f"select fifa_id from player_table where fifa_id in ({id_list}) and date='{date_id}';"
     existing_idx = fetchall(query, conn)
     return [idx[0] for idx in existing_idx]
+
+def get_last_data_date(date, **kwargs):
+    query = f"select date from player_table where date <= '{date}';"
+    return fetchone(query, kwargs["conn"])
+
+def get_data_for_team(team, date, **kwargs):
+    query = f"select * from player_table where date='{date}' and club='{team}';"
+    return fetchall(query, kwargs["conn"])
