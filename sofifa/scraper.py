@@ -1,3 +1,5 @@
+import argparse
+import time
 from multiprocessing import Pool, cpu_count
 import numpy as np
 import pandas as pd
@@ -15,6 +17,10 @@ def get_player_data(url):
     except RedirectException:
         return False
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', type=str)
+args = parser.parse_args()
+
 logging = get_logger()
 
 number_of_cores = cpu_count()
@@ -30,6 +36,10 @@ def run():
     bs.decompose()
 
     for date, query_string in dates.items():
+        if args.d:
+            if time.strptime(date, "%Y-%m-%d") >= time.strptime(args.d, "%Y-%m-%d"):
+                continue
+
         logging.info(f"Starting to scrape data for {query_string}")
 
         offset = 0
