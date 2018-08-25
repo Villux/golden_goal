@@ -59,13 +59,14 @@ def run():
 
             results = [result for result in results if result != False]
             results = [item for sublist in results for item in sublist]
-            df = pd.DataFrame(results)
-            df["date"] = date
-            df["query_string"] = query_string
-            df = df.set_index("fifa_id")
+            if results:
+                df = pd.DataFrame(results)
+                df["date"] = date
+                df["query_string"] = query_string
+                df = df.set_index("fifa_id")
 
-            player.insert_or_update_player_data(df, date, conn=conn)
-            conn.commit()
+                player.insert_or_update_player_data(df, date, conn=conn)
+                conn.commit()
 
             offset = offset_list[-1]
     close_connection(conn)
