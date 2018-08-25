@@ -1,4 +1,3 @@
-import argparse
 import time
 from multiprocessing import Pool, cpu_count
 import numpy as np
@@ -17,10 +16,6 @@ def get_player_data(url):
     except RedirectException:
         return False
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-d', type=str)
-args = parser.parse_args()
-
 logging = get_logger()
 
 number_of_cores = cpu_count()
@@ -28,7 +23,7 @@ players_per_page = 50
 
 player_url = "https://sofifa.com/players"
 
-def run():
+def run(date_filter):
     conn = open_connection()
     bs = get_page(player_url)
     dates = get_data_update_query_strings(bs)
@@ -36,8 +31,8 @@ def run():
     bs.decompose()
 
     for date, query_string in dates.items():
-        if args.d:
-            if time.strptime(date, "%Y-%m-%d") >= time.strptime(args.d, "%Y-%m-%d"):
+        if date_filter:
+            if time.strptime(date, "%Y-%m-%d") >= date_filter:
                 continue
 
         logging.info(f"Starting to scrape data for {query_string}")
