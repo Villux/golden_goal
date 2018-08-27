@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from services.data_provider import get_dataset
 
 def run_grid_search(grid):
-    X, y = get_dataset("master_data.csv")
+    X, y = get_dataset("outcome", path="master_data.csv")
 
     tuning = GridSearchCV(
         estimator=RandomForestClassifier(oob_score=True, bootstrap=True, n_jobs=-1),
