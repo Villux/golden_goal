@@ -17,6 +17,7 @@ class SeasonSimulator():
         self.matches = []
         self.unit_strategy = None
         self.kelly_strategy = None
+        self.kelly_strategy_single = None
 
     def run_match_simulations(self):
         matches = mt.get_matches_for_seasons([self.season_id], conn=self.conn)
