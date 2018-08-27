@@ -1,5 +1,5 @@
 from db import helper as dbh
-from db.interface import fetchone
+from db.interface import fetchone, fetchall
 
 table_name = "season_table"
 
@@ -20,3 +20,13 @@ def get_previous_season(season_id, **kwargs):
 
     query = f"select id from season_table where end_date < '{start_date}' and division_id={division_id} order by end_date desc;"
     return fetchone(query, conn)
+
+def get_seasons_for_division(division, **kwargs):
+    if not division:
+        query = f"select id from season_table;"
+    elif isinstance(division, list):
+        query = f"select id from season_table where division_id IN ({','.join(str(idd) for idd in division)});"
+    elif isinstance(division, int):
+        query = f"select id from season_table where division_id={division};"
+
+    return fetchall(query, kwargs["conn"])
