@@ -34,7 +34,7 @@ def get_match_datapoints(match_obj):
     return {**match_obj, **home, **away}
 
 def get_data_for_matches(matches):
-    pool = Pool(cpu_count())
+    pool = Pool(cpu_count() * 3)
     data_list = pool.map(get_match_datapoints, [record for _, record in matches.to_dict('index').items()])
     return pd.DataFrame(data_list)
 
