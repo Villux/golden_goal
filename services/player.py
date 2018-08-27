@@ -42,10 +42,9 @@ def insert_or_update_player_data(player_data, date, **kwargs):
 def calculate_team_average(df):
     record = {}
     for (field, N) in field_list:
-        field_serie = df[field].dropna()
-        if field_serie.shape[0] > 0:
-            df = df.nlargest(N, field)
-            record[field] = field_serie.mean()
+        sorted_df = df.nlargest(N, field)
+        if sorted_df.shape[0] > 0:
+            record[field] = sorted_df[field].mean()
         else:
             record[field] = None
     return record
@@ -54,7 +53,7 @@ def calculate_player_features_for_team(team, date, **kwargs):
     dd_tuple = pt.get_last_data_date(date, **kwargs)
     if dd_tuple:
         data_date = dd_tuple[0]
-        logging.info(f"Calculating team features for date {data_date} and team {team}")
+        logging.debug(f"Calculating team features for date {data_date} and team {team}")
         player_data = pt.get_data_for_team(team, data_date, **kwargs)
         record = calculate_team_average(player_data)
     else:
