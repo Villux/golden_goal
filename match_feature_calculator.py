@@ -34,15 +34,14 @@ def get_match_datapoints(match_obj):
     return {**match, **home, **away}
 
 def get_data_for_matches(matches):
-    func_args = [record for _, record in matches.to_dict('index').items()]
     pool = Pool(cpu_count())
-    data_list = pool.map(get_match_datapoints, func_args)
+    data_list = pool.map(get_match_datapoints, [record for _, record in matches.to_dict('index').items()])
     return pd.DataFrame(data_list)
 
 if __name__ == "__main__":
     connection = open_connection()
     if args.d:
-        season_tuples = st.get_seasons_for_division(args.d)
+        season_tuples = st.get_seasons_for_division(args.d, conn=connection)
         season_ids = [season[0] for season in season_tuples]
     else:
         season_ids = None
