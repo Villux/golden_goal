@@ -36,6 +36,7 @@ def get_elo_from_result(elo_A, elo_B, goals_A, goals_B):
 
 def insert_initial_elo(team, season_id, date, **kwargs):
     elo_id = insert(team, season_id, date, INITIAL_ELO,  **kwargs)
+    kwargs["conn"].commit()
     return (INITIAL_ELO, elo_id)
 
 def get_elo_and_id(team, date, season_id, **kwargs):
@@ -50,7 +51,6 @@ def get_elo_and_id(team, date, season_id, **kwargs):
                 elo = et.select_latest_for_season(previous_season_id[0], **kwargs)
                 if not elo:
                     elo = insert_initial_elo(team, season_id, date, **kwargs)
-    kwargs["conn"].commit()
     return elo
 
 def insert(team, season_id, date, elo, **kwargs):
