@@ -87,7 +87,7 @@ create_team_feature_table = '''
     CREATE TABLE IF NOT EXISTS "team_feature_table" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "club" TEXT,
-      "match_id": INTEGER,
+      "match_id" INTEGER,
       "date" TIMESTAMP,
       "acceleration" REAL,
       "age" REAL,
