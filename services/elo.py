@@ -46,7 +46,7 @@ def get_elo_and_id(team, date, season_id, **kwargs):
         previous_season_id = st.get_previous_season(season_id, **kwargs)
         if not previous_season_id:
             logging.info(f"No previous season - inserting initial elo for {team}, {date}, {season_id}")
-            elo = insert_initial_elo(team, season_id, date, **kwargs)
+            elo = insert_initial_elo(team, season_id, "1900-01-01", **kwargs)
         else:
             elo = et.select_latest_for_team(team, date, previous_season_id[0], **kwargs)
             if not elo:
