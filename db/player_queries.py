@@ -132,3 +132,5 @@ create_team_feature_table = '''
     );'''
 
 drop_team_feature_query = "DROP TABLE IF EXISTS team_feature_table;"
+create_team_feature_date_index = "CREATE INDEX team_index ON team_feature_table (date);"
+create_team_feature_club_index = "CREATE INDEX team_club_index ON team_feature_table (club);"
