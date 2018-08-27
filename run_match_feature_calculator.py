@@ -31,7 +31,7 @@ def get_match_datapoints(match_obj):
     home, away = player.get_team_features_for_matches(home_team, away_team, date, conn=conn)
 
     close_connection(conn)
-    return {**match, **home, **away}
+    return {**match_obj, **home, **away}
 
 def get_data_for_matches(matches):
     pool = Pool(cpu_count())
