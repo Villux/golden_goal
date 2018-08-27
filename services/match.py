@@ -1,6 +1,7 @@
 import pandas as pd
 from db import match_table as mt
 from services.odds import insert_odds_for_match
+from services.utils import map_team_names
 
 HOME = 1
 AWAY = 2
@@ -26,6 +27,8 @@ def insert_matches(df, season_id, **kwargs):
     conn = kwargs["conn"]
     for _, record in df.to_dict('index').items():
         record["season_id"] = season_id
+        record["HomeTeam"] = map_team_names(record["HomeTeam"])
+        record["AwayTeam"] = map_team_names(record["AwayTeam"])
         match_id = mt.insert(conn=conn, **remove_extra_keys(record))
         insert_odds_for_match(record, match_id, conn)
 
