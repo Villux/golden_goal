@@ -1,7 +1,6 @@
 import numpy as np
 
 from db import player_table as pt
-from db import team_feature_table as tft
 from logger import logging
 
 TOP = 3
@@ -55,15 +54,9 @@ def calculate_player_features_for_team(team, date, **kwargs):
     dd_tuple = pt.get_last_data_date(date, **kwargs)
     if dd_tuple:
         data_date = dd_tuple[0]
-        team_features = tft.get_features(team, data_date, **kwargs)
-        if team_features.shape[0] == 0:
-            logging.info(f"Calculating team features for date {data_date} and team {team}")
-            player_data = pt.get_data_for_team(team, data_date, **kwargs)
-            record = calculate_team_average(player_data)
-            tft.insert(kwargs["conn"], **record)
-            kwargs["conn"].commit()
-        else:
-            record = team_features[0]
+        logging.info(f"Calculating team features for date {data_date} and team {team}")
+        player_data = pt.get_data_for_team(team, data_date, **kwargs)
+        record = calculate_team_average(player_data)
     else:
         record = {}
 
