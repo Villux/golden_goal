@@ -42,9 +42,9 @@ def insert_or_update_player_data(player_data, date, **kwargs):
 def calculate_team_average(df):
     record = {}
     for (field, N) in field_list:
-        sorted_df = df.nlargest(N, field)
+        sorted_df = df.sort_values(by=[field], ascending=False)
         if sorted_df.shape[0] > 0:
-            record[field] = sorted_df[field].mean()
+            record[field] = sorted_df[field].iloc[0:N].mean()
         else:
             record[field] = None
     return record
