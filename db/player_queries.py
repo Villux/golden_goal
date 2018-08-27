@@ -77,7 +77,60 @@ create_query = '''
 '''
 
 create_index = "CREATE INDEX player_index ON player_table (id);"
-create_fifa_index = "CREATE INDEX date_id_index ON player_table (date);"
+create_fifa_index = "CREATE INDEX fifa_id_index ON player_table (fifa_id);"
 create_date_index = "CREATE INDEX date_id_index ON player_table (date);"
+create_club_index = "CREATE INDEX club_id_index ON player_table (club);"
 
 drop_query = "DROP TABLE IF EXISTS player_table;"
+
+create_team_feature_table = '''
+    CREATE TABLE IF NOT EXISTS "team_feature_table" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "club" TEXT,
+      "date" TIMESTAMP,
+      "acceleration" REAL,
+      "age" REAL,
+      "aggression" REAL,
+      "agility" REAL,
+      "balance" REAL,
+      "ball_control" REAL,
+      "composure" REAL,
+      "crossing" REAL,
+      "curve" REAL,
+      "dribbling" REAL,
+      "finishing" REAL,
+      "fk_accuracy" REAL,
+      "gk_diving" REAL,
+      "gk_handling" REAL,
+      "gk_kicking" REAL,
+      "gk_positioning" REAL,
+      "gk_reflexes" REAL,
+      "growth" REAL,
+      "heading_accuracy" REAL,
+      "height" REAL,
+      "interceptions" REAL,
+      "international_reputation" REAL,
+      "jumping" REAL,
+      "long_passing" REAL,
+      "long_shots" REAL,
+      "marking" REAL,
+      "overall_rating" REAL,
+      "penalties" REAL,
+      "positioning" REAL,
+      "potential" REAL,
+      "reactions" REAL,
+      "short_passing" REAL,
+      "shot_power" REAL,
+      "skill_moves" REAL,
+      "sliding_tackle" REAL,
+      "sprint_speed" REAL,
+      "stamina" REAL,
+      "standing_tackle" REAL,
+      "strength" REAL,
+      "vision" REAL,
+      "volleys" REAL,
+      "week_foot" REAL,
+      "weight" REAL
+    );'''
+
+drop_team_feature_query = "DROP TABLE IF EXISTS team_feature_table;"
