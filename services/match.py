@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from db import match_table as mt
 from services.odds import insert_odds_for_match
 from services.utils import map_team_names
@@ -6,6 +7,9 @@ from services.utils import map_team_names
 HOME = 1
 AWAY = 2
 HOMEAWAY = 3
+
+def get_match_outcome(match):
+    return np.sign(match["FTHG"] - match["FTAG"])
 
 def merge_dataset_get_n(home_df, away_df, N, sort_col="date", asc=False):
     matches = pd.concat([home_df, away_df], axis=0)
@@ -62,4 +66,4 @@ def calculate_xg(team, date, N, combination=HOME, **kwargs):
         matches = merge_dataset_get_n(home_matches, away_matches, N)
 
     matches["xg"] = matches["full_time_goals"] / matches["shots_on_target"]
-    return matches["xg"].mean()
+    return matches["xg"].replace([np.inf, -np.inf], np.nan).mean()
