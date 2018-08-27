@@ -32,7 +32,8 @@ def insert_matches(df, season_id, **kwargs):
         match_id = mt.insert(conn=conn, **remove_extra_keys(record))
         insert_odds_for_match(record, match_id, conn)
 
-def calculate_goal_average(team, date, N, conn):
+def calculate_goal_average(team, date, N, **kwargs):
+    conn = kwargs["conn"]
     home_matches = mt.get_n_latest_matches_before_date(team, date, N, conn, hometeam=True)[["Date", "FTHG"]]
     away_matches = mt.get_n_latest_matches_before_date(team, date, N, conn, hometeam=False)[["Date", "FTAG"]]
     column_names = ["date", "score"]
@@ -42,7 +43,8 @@ def calculate_goal_average(team, date, N, conn):
     matches = merge_dataset_get_n(home_matches, away_matches, N)
     return matches["score"].mean()
 
-def calculate_xg(team, date, N, conn, combination=HOME):
+def calculate_xg(team, date, N, combination=HOME, **kwargs):
+    conn = kwargs["conn"]
     column_names = ["date", "shots_on_target", "full_time_goals"]
     if combination == HOME:
         matches = mt.get_n_latest_matches_before_date(team, date, N, conn, hometeam=True)[["Date", "HST", "FTHG"]]
