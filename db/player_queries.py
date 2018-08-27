@@ -87,6 +87,7 @@ create_team_feature_table = '''
     CREATE TABLE IF NOT EXISTS "team_feature_table" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "club" TEXT,
+      "match_id": INTEGER,
       "date" TIMESTAMP,
       "acceleration" REAL,
       "age" REAL,
@@ -130,7 +131,8 @@ create_team_feature_table = '''
       "vision" REAL,
       "volleys" REAL,
       "week_foot" REAL,
-      "weight" REAL
+      "weight" REAL,
+      FOREIGN KEY(match_id) REFERENCES match_table(id)
     );'''
 
 drop_team_feature_query = "DROP TABLE IF EXISTS team_feature_table;"
