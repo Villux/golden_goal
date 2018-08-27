@@ -1,10 +1,7 @@
-from multiprocessing import Pool, cpu_count
 import numpy as np
-import pandas as pd
 
 from db import player_table as pt
 from db import team_feature_table as tft
-from db.interface import open_connection, close_connection
 from logger import logging
 
 TOP = 3
@@ -70,23 +67,9 @@ def calculate_player_features_for_team(team, date, **kwargs):
 
     return record
 
-def multi_conn_calculate_player_features_for_match(args):
-    home_team, away_team, date = args
-    conn = open_connection()
-    home_features = calculate_player_features_for_team(home_team, date, conn=conn)
+def get_team_features_for_matches(home_team, away_team, date, **kwargs):
+    home_features = calculate_player_features_for_team(home_team, date, **kwargs)
     home_features = {f'home_{k}': v for k, v in home_features.items()}
-    away_features = calculate_player_features_for_team(away_team, date, conn=conn)
+    away_features = calculate_player_features_for_team(away_team, date, **kwargs)
     away_features = {f'away_{k}': v for k, v in away_features.items()}
-    close_connection(conn)
-    return (home_features, away_features)
-
-
-def get_team_features_for_matches(matches):
-    pool = Pool(cpu_count())
-    match_values = matches[["HomeTeam", "AwayTeam", "Date"]].values
-    args = [(args[0], args[1], args[2]) for args in match_values]
-    results = pool.map(multi_conn_calculate_player_features_for_match, args)
-    home_features = pd.DataFrame([r[0] for r in results])
-    away_features = pd.DataFrame([r[1] for r in results])
-
-    return pd.concat([matches, home_features, away_features], axis=1)
+    return home_features, away_features
