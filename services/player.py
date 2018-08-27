@@ -64,6 +64,8 @@ def calculate_player_features_for_team(team, date, **kwargs):
             kwargs["conn"].commit()
         else:
             record = team_features[0]
+    else:
+        record = {}
 
     return record
 
