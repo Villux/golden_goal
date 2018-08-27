@@ -50,6 +50,7 @@ def get_elo_and_id(team, date, season_id, **kwargs):
                 elo = et.select_latest_for_season(previous_season_id[0], **kwargs)
                 if not elo:
                     elo = insert_initial_elo(team, season_id, date, **kwargs)
+    kwargs["conn"].commit()
     return elo
 
 def insert(team, season_id, date, elo, **kwargs):
@@ -64,3 +65,14 @@ def insert(team, season_id, date, elo, **kwargs):
 
 def attach_elo_to_match(match_id, home_elo_id, away_elo_id, **kwargs):
     et.attach_match_to_elo(match_id, home_elo_id, away_elo_id, **kwargs)
+
+def calculate_elo_for_matches(matches, **kwargs):
+    for _, record in matches.to_dict('index').items():
+        home_elo, home_elo_id = get_elo_and_id(record["HomeTeam"], record["Date"], record["season_id"], **kwargs)
+        away_elo, away_elo_id = get_elo_and_id(record["AwayTeam"], record["Date"], record["season_id"], **kwargs)
+        attach_elo_to_match(record["id"], home_elo_id, away_elo_id, **kwargs)
+
+        new_home_elo, new_away_elo = get_elo_from_result(home_elo, away_elo, record["FTHG"], record["FTAG"])
+        insert(record["HomeTeam"], record["season_id"], record["Date"], new_home_elo, **kwargs)
+        insert(record["AwayTeam"], record["season_id"], record["Date"], new_away_elo, **kwargs)
+        kwargs["conn"].commit()
