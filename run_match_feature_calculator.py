@@ -21,12 +21,12 @@ def get_match_datapoints(match_obj):
     home_team = match_obj["HomeTeam"]
     match_obj["home_xg"] = match.calculate_xg(home_team, date, N, combination=match.HOMEAWAY, conn=conn)
     match_obj["home_goal_mean"] = match.calculate_goal_average(home_team, date, N, conn=conn)
-    match_obj["home_elo"] = elo.get_elo_and_id(home_team, date, season_id, conn=conn)
+    match_obj["home_elo"] = elo.get_elo_and_id(home_team, date, season_id, conn=conn)[0]
 
     away_team = match_obj["AwayTeam"]
     match_obj["away_xg"] = match.calculate_xg(away_team, date, N, combination=match.HOMEAWAY, conn=conn)
     match_obj["away_goal_mean"] = match.calculate_goal_average(away_team, date, N, conn=conn)
-    match_obj["away_elo"] = elo.get_elo_and_id(away_team, date, season_id, conn=conn)
+    match_obj["away_elo"] = elo.get_elo_and_id(away_team, date, season_id, conn=conn)[0]
 
     home, away = player.get_team_features_for_matches(home_team, away_team, date, conn=conn)
 
