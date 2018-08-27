@@ -1,5 +1,11 @@
+from multiprocessing import Pool, cpu_count
 import numpy as np
+import pandas as pd
+
 from db import player_table as pt
+from db import team_feature_table as tft
+from db.interface import open_connection, close_connection
+from logger import logging
 
 TOP = 3
 HALF =  5
@@ -12,12 +18,11 @@ field_list = [("acceleration", TOP), ("age", ALL), ("aggression", TOP), ("agilit
               ("curve", HALF), ("dribbling", HALF), ("finishing", TOP), ("fk_accuracy", TOP),
               ("gk_diving", GK), ("gk_handling", GK), ("gk_kicking", GK), ("gk_positioning", GK),
               ("gk_reflexes", GK), ("growth", HALF), ("heading_accuracy", HALF), ("height", FIELD),
-              ("interceptions", HALF), ("international_reputation", ALL), ("jumping", TOP),
-              ("long_passing", HALF), ("long_shots", TOP), ("marking", TOP), ("overall_rating", ALL),
-              ("penalties", TOP), ("positioning", HALF), ("potential", ALL), ("reactions", HALF),
-              ("short_passing", HALF), ("shot_power", TOP), ("skill_moves", TOP), ("sliding_tackle", TOP),
-              ("sprint_speed", TOP), ("stamina", FIELD), ("standing_tackle", HALF), ("strength", FIELD),
-              ("vision", HALF), ("volleys", TOP), ("week_foot", HALF), ("weight", ALL)]
+              ("interceptions", HALF), ("jumping", TOP), ("long_passing", HALF), ("long_shots", TOP),
+              ("marking", TOP), ("overall_rating", ALL), ("penalties", TOP), ("positioning", HALF),
+              ("potential", ALL), ("reactions", HALF), ("short_passing", HALF), ("shot_power", TOP),
+              ("skill_moves", TOP), ("sliding_tackle", TOP), ("sprint_speed", TOP), ("stamina", FIELD),
+              ("standing_tackle", HALF), ("strength", FIELD), ("vision", HALF), ("volleys", TOP), ("weight", ALL)]
 
 def insert_players(df, conn):
     for idx, record in df.to_dict('index').items():
@@ -37,3 +42,51 @@ def insert_or_update_player_data(player_data, date, **kwargs):
 
     insert_players(new_df, conn)
     update_players_by_fifa_id_and_date(existing_df, date, conn)
+
+def calculate_team_average(df):
+    record = {}
+    for (field, N) in field_list:
+        field_serie = df[field].dropna()
+        if field_serie.shape[0] > 0:
+            df = df.nlargest(N, field)
+            record[field] = field_serie.mean()
+        else:
+            record[field] = None
+    return record
+
+def calculate_player_features_for_team(team, date, **kwargs):
+    dd_tuple = pt.get_last_data_date(date, **kwargs)
+    if dd_tuple:
+        data_date = dd_tuple[0]
+        team_features = tft.get_features(team, data_date, **kwargs)
+        if team_features.shape[0] == 0:
+            logging.info(f"Calculating team features for date {data_date} and team {team}")
+            player_data = pt.get_data_for_team(team, data_date, **kwargs)
+            record = calculate_team_average(player_data)
+            tft.insert(kwargs["conn"], **record)
+            kwargs["conn"].commit()
+        else:
+            record = team_features[0]
+
+    return record
+
+def multi_conn_calculate_player_features_for_match(args):
+    home_team, away_team, date = args
+    conn = open_connection()
+    home_features = calculate_player_features_for_team(home_team, date, conn=conn)
+    home_features = {f'home_{k}': v for k, v in home_features.items()}
+    away_features = calculate_player_features_for_team(away_team, date, conn=conn)
+    away_features = {f'away_{k}': v for k, v in away_features.items()}
+    close_connection(conn)
+    return (home_features, away_features)
+
+
+def get_team_features_for_matches(matches):
+    pool = Pool(cpu_count())
+    match_values = matches[["HomeTeam", "AwayTeam", "Date"]].values
+    args = [(args[0], args[1], args[2]) for args in match_values]
+    results = pool.map(multi_conn_calculate_player_features_for_match, args)
+    home_features = pd.DataFrame([r[0] for r in results])
+    away_features = pd.DataFrame([r[1] for r in results])
+
+    return pd.concat([matches, home_features, away_features], axis=1)
