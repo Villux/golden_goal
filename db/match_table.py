@@ -38,6 +38,10 @@ def get_teams(division, conn):
     result = fetchall(query, conn)
     return [r[0] for r in result]
 
-def get_matches(conn, asc=True):
+def get_matches(asc=True, **kwargs):
     query = f"SELECT * FROM match_table order by date {'asc' if asc else 'desc'};"
-    return pd.read_sql(query, conn)
+    return pd.read_sql(query, kwargs["conn"])
+
+def get_matches_for_seasons(seasons, **kwargs):
+    query = f"SELECT * FROM match_table where season_id IN ({','.join(str(idd) for idd in seasons)});"
+    return pd.read_sql(query, kwargs["conn"])
