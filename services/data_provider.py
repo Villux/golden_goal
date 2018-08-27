@@ -42,10 +42,6 @@ class DataLoader():
         df = self.load_dataset()
         X = self.get_feature_matrix(df)
         df["outcome"] = np.sign(df["FTHG"] - df["FTAG"])
-        df.loc[df["outcome"] == -1, "outcome"] = 2
-        df.loc[df["outcome"] == 0, "outcome"] = -11
-        df.loc[df["outcome"] == 1, "outcome"] = 0
-        df.loc[df["outcome"] == -11, "outcome"] = 1
 
         X = X.dropna()
         y = df.loc[X.index, self.label]
@@ -70,7 +66,7 @@ class DataLoader():
 
     def get_odds_for_matches(self, matches, odds_provider, **kwargs):
         output = []
-        for _, match in matches.to_dict("index").items():
+        for match in matches:
             home_win, draw, away_win = ot.get_for_match(match["id"], odds_provider, **kwargs)
-            output.append([home_win, draw, away_win])
+            output.append(np.array([home_win, draw, away_win]))
         return output
