@@ -17,6 +17,15 @@ def run_grid_search(grid, data_loader):
         cv=5)
     tuning.fit(X, y)
 
+    print("Grid scores on development set:")
+    print()
+    means = tuning.cv_results_['mean_test_score']
+    stds = tuning.cv_results_['std_test_score']
+    for mean, std, params in zip(means, stds, tuning.cv_results_['params']):
+        print("%0.3f (+/-%0.03f) for %r"
+              % (mean, std * 2, params))
+    print()
+
     return tuning.best_params_, tuning.best_score_
 
 def get_model(params, X=None, y=None):
