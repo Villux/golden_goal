@@ -2,6 +2,7 @@ import ipdb
 from db.interface import open_connection
 from simulation.season_simulator import SeasonSimulator
 from simulation.predictor import OutcomePredictor
+from simulation.utils import plot_simulation
 from services.data_provider import DataLoader, feature_columns
 from models.outcome_model import get_model, get_default_param
 
@@ -15,5 +16,6 @@ predictor = OutcomePredictor(model)
 
 simulator = SeasonSimulator(season_id, data_loader, predictor, conn)
 simulator.run()
+plot_simulation(simulator)
 
 ipdb.set_trace()
