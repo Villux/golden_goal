@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 
 from services import elo, match as ms, player
 from db import odds_table as ot
+from logger import logging
 
 feature_columns = ["acceleration", "age", "aggression", "agility", "balance", "ball_control",
                 "crossing", "curve", "dribbling", "finishing", "fk_accuracy", "gk_diving", "gk_handling",
@@ -45,6 +46,7 @@ class DataLoader():
 
         X = X.dropna()
         y = df.loc[X.index, self.label]
+        logging.debug(f"Dataset size: {X.shape}")
         return X, y
 
     def get_match_feature_vector(self, match, **kwargs):
