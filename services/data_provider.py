@@ -98,9 +98,9 @@ class DataLoader():
         data_merge_obj = {**data_merge_obj, **home, **away}
         return self.get_feature_matrix(pd.DataFrame([data_merge_obj]))
 
-    def get_odds_for_matches(self, matches, odds_provider, **kwargs):
+    def get_odds_for_matches(self, matches, **kwargs):
         output = []
         for match in matches:
-            home_win, draw, away_win = ot.get_for_match(match["id"], odds_provider, **kwargs)
+            home_win, draw, away_win = ot.get_for_match(match["id"], "Pinnacle", **kwargs)
             output.append(np.array([home_win, draw, away_win]))
         return output
