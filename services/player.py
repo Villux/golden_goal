@@ -5,20 +5,20 @@ from logger import logging
 
 TOP = 5
 HALF =  7
-FIELD =  13
+FIELD =  15
 GK = 2
 ALL = 25
 
-field_list = [("acceleration", TOP), ("age", ALL), ("aggression", TOP), ("agility", TOP),
-              ("balance", TOP), ("ball_control", HALF), ("composure", TOP), ("crossing", HALF),
-              ("curve", HALF), ("dribbling", HALF), ("finishing", TOP), ("fk_accuracy", TOP),
-              ("gk_diving", GK), ("gk_handling", GK), ("gk_kicking", GK), ("gk_positioning", GK),
-              ("gk_reflexes", GK), ("growth", HALF), ("heading_accuracy", HALF), ("height", FIELD),
-              ("interceptions", HALF), ("jumping", TOP), ("long_passing", HALF), ("long_shots", TOP),
-              ("marking", TOP), ("overall_rating", ALL), ("penalties", TOP), ("positioning", HALF),
-              ("potential", ALL), ("reactions", HALF), ("short_passing", HALF), ("shot_power", TOP),
-              ("skill_moves", TOP), ("sliding_tackle", TOP), ("sprint_speed", TOP), ("stamina", FIELD),
-              ("standing_tackle", HALF), ("strength", FIELD), ("vision", HALF), ("volleys", TOP), ("weight", ALL)]
+field_list = [("acceleration", TOP, None), ("age", FIELD, "overall_rating"), ("aggression", TOP, None), ("agility", TOP, None),
+              ("balance", TOP, None), ("ball_control", HALF, None), ("composure", TOP, None), ("crossing", HALF, None),
+              ("curve", HALF, None), ("dribbling", HALF, None), ("finishing", TOP, None), ("fk_accuracy", TOP, None),
+              ("gk_diving", GK, None), ("gk_handling", GK, None), ("gk_kicking", GK, None), ("gk_positioning", GK, None),
+              ("gk_reflexes", GK, None), ("growth", HALF, None), ("heading_accuracy", HALF, None), ("height", FIELD, "overall_rating"),
+              ("interceptions", HALF, None), ("jumping", TOP, None), ("long_passing", HALF, None), ("long_shots", TOP, None),
+              ("marking", TOP, None), ("overall_rating", ALL, None), ("penalties", TOP, None), ("positioning", HALF, None),
+              ("potential", ALL, None), ("reactions", HALF, None), ("short_passing", HALF, None), ("shot_power", TOP, None),
+              ("skill_moves", TOP, None), ("sliding_tackle", TOP, None), ("sprint_speed", TOP, None), ("stamina", FIELD, None),
+              ("standing_tackle", HALF, None), ("strength", FIELD, None), ("vision", HALF, None), ("volleys", TOP, None)]
 
 def insert_players(df, conn):
     for idx, record in df.to_dict('index').items():
@@ -41,8 +41,10 @@ def insert_or_update_player_data(player_data, date, **kwargs):
 
 def calculate_team_average(df):
     record = {}
-    for (field, N) in field_list:
-        sorted_df = df.sort_values(by=[field], ascending=False)
+    for (field, N, sort_key) in field_list:
+        if not sort_key:
+            sort_key = field
+        sorted_df = df.sort_values(by=[sort_key], ascending=False)
         if sorted_df.shape[0] > 0:
             record[field] = sorted_df[field].iloc[0:N].mean()
         else:
