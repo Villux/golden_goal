@@ -3,9 +3,9 @@ import numpy as np
 from db import player_table as pt
 from logger import logging
 
-TOP = 3
-HALF =  5
-FIELD =  10
+TOP = 5
+HALF =  7
+FIELD =  13
 GK = 2
 ALL = 25
 
