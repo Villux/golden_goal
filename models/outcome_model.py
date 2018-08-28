@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from services.data_provider import DataLoader, feature_columns
 
 def get_default_param():
-    return {'max_depth': 5, 'max_features': 'sqrt', 'min_samples_leaf': 15,
+    return {'max_depth': 5, 'max_features': 'log2', 'min_samples_leaf': 1,
             'n_estimators': 2000, "oob_score": True, "bootstrap": True, "n_jobs": -1}
 
 def run_grid_search(grid, data_loader):
