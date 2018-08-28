@@ -21,6 +21,38 @@ class DataLoader():
         self.label = label
         self.path = path
 
+    @staticmethod
+    def get_subset_of_home_wins(df, frac=0.20):
+        return df.loc[(df["FTHG"] > df["FTAG"])].sample(frac=frac)
+
+    @staticmethod
+    def switch_home_and_away(df):
+        renamed = {}
+        for col in df.columns.values:
+            if col[0:4] == "home":
+                renamed[col] = "away" + col[4:]
+            elif col[0:4] == "away":
+                renamed[col] = "home" + col[4:]
+            else:
+                renamed[col] = col
+        df = df.rename(columns=renamed)
+        df = df.rename(columns={
+            "FTHG": "FTAG",
+            "FTAG": "FTHG"
+        })
+        df["outcome"] = -1
+        return df
+
+    def balance_home_wins(self, df):
+        _, counts = np.unique(df["outcome"].values, return_counts=True)
+        frac = np.around(1 - ((counts[0] + counts[2]) / 2)/counts[2], 2)
+        logging.debug(f"Flip games with fraction: {frac}")
+
+        flip_df = self.get_subset_of_home_wins(df, frac=frac)
+        flip_df = self.switch_home_and_away(flip_df)
+        df.update(flip_df)
+        return df
+
     def filter_data(self, dataset):
         return dataset.loc[~dataset['season_id'].isin(self.filter_season)]
 
@@ -41,9 +73,9 @@ class DataLoader():
 
     def get_dataset(self):
         df = self.load_dataset()
-        X = self.get_feature_matrix(df)
         df["outcome"] = np.sign(df["FTHG"] - df["FTAG"])
 
+        X = self.get_feature_matrix(df)
         X = X.dropna()
         y = df.loc[X.index, self.label]
         logging.debug(f"Dataset size: {X.shape}")
