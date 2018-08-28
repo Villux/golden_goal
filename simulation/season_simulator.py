@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.metrics import accuracy_score
 
 from services import match as ms
@@ -41,6 +42,7 @@ class SeasonSimulator():
         logging.info(f"Model's accuracy for season {self.season_id}: {accuracy_score(y_true, y_pred)}")
         probabilities = df["outcome_proba"].values
         odds = self.data_loader.get_odds_for_matches(self.matches, conn=self.conn)
+        logging.info(f"Average overroundness of the odds: {np.mean([((1/odd[0] + 1/odd[1] + 1/odd[2])-1) for odd in odds])}")
 
         self.unit_strategy = UnitStrategy(y_true, y_pred)
         self.unit_strategy.run(odds)
