@@ -12,7 +12,7 @@ feature_columns = ["acceleration", "age", "aggression", "agility", "balance", "b
                 "interceptions", "jumping", "long_passing", "long_shots", "marking", "overall_rating",
                 "penalties", "positioning", "potential", "reactions", "short_passing", "shot_power",
                 "skill_moves", "sliding_tackle", "sprint_speed", "stamina", "standing_tackle", "strength",
-                "vision", "volleys", "weight", "xg", "goal_mean", "elo"]
+                "vision", "volleys", "xg", "goal_mean", "elo"]
 
 class DataLoader():
     def __init__(self, features, label, filter_season=[], path="master_data.csv"):
