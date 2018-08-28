@@ -4,7 +4,7 @@ from db import player_table as pt
 from logger import logging
 
 TOP = 5
-HALF =  7
+HALF =  8
 FIELD =  15
 GK = 2
 ALL = 25
