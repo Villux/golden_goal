@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.metrics import accuracy_score
 
 from services import match as ms
 import db.match_table as mt
@@ -37,8 +38,9 @@ class SeasonSimulator():
         df = pd.DataFrame(self.matches)
         y_pred = df["predicted_outcome"].values
         y_true = df["outcome"].values
+        logging.info(f"Model's accuracy for season {self.season_id}: {accuracy_score(y_true, y_pred)}")
         probabilities = df["outcome_proba"].values
-        odds = self.data_loader.get_odds_for_matches(self.matches, "Pinnacle closing", conn=self.conn)
+        odds = self.data_loader.get_odds_for_matches(self.matches, conn=self.conn)
 
         self.unit_strategy = UnitStrategy(y_true, y_pred)
         self.unit_strategy.run(odds)
