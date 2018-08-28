@@ -45,3 +45,7 @@ def get_matches(asc=True, **kwargs):
 def get_matches_for_seasons(seasons, **kwargs):
     query = f"SELECT * FROM match_table where season_id IN ({','.join(str(idd) for idd in seasons)});"
     return pd.read_sql(query, kwargs["conn"])
+
+def get_teams_for_season(season_id, **kwargs):
+    query = f"select distinct(HomeTeam) from match_table where season_id={season_id};"
+    return fetchall(query, conn=kwargs["conn"])
