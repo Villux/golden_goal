@@ -5,19 +5,16 @@ from logger import logging
 INITIAL_ELO = 1500
 
 def expected(A, B):
-    return 1 / (1 + 10 ** ((B - A) / 400))
+    c = 10
+    d = 400
+    return 1 / (1 + c ** ((B - A) / d))
 
 def calculate_elo(old, exp, score, K):
     return old + K * (score - exp)
 
 def get_new_elo(A, B, goals_A, goals_B, K):
     goals_diff = abs(goals_A - goals_B)
-    if goals_diff == 2:
-        K *= 1.5
-    elif goals_diff == 3:
-        K *= 1.75
-    elif goals_diff > 3:
-        K *= (1.75 + (goals_diff - 3) / 8)
+    K = K*(1+goals_diff)
 
     if goals_A > goals_B:
         score = 1
@@ -28,7 +25,7 @@ def get_new_elo(A, B, goals_A, goals_B, K):
     return calculate_elo(A, expected(A, B), score, K)
 
 def get_elo_from_result(elo_A, elo_B, goals_A, goals_B):
-    K = 40
+    K = 10
 
     new_elo_A = get_new_elo(elo_A, elo_B, goals_A, goals_B, K)
     new_elo_B = get_new_elo(elo_B, elo_A, goals_B, goals_A, K)
