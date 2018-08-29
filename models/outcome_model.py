@@ -36,9 +36,9 @@ def get_model(params, X=None, y=None):
 
 if __name__ == "__main__":
     param_grid = {
-        'max_depth': [3, 5, 8, 12, None],
-        'min_samples_leaf': [1, 3, 5, 10, 15],
-        'max_features': ["sqrt", "log2"],
+        'max_depth': [5],
+        'min_samples_leaf': [10, 15, 20, 25, 30, 40, 50],
+        'max_features': ["sqrt"],
         'n_estimators': [2000]
     }
     dl = DataLoader(feature_columns, "outcome")
