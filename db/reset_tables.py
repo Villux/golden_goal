@@ -5,24 +5,25 @@ from db.interface import execute_statement, open_connection, close_connection
 
 if __name__ == "__main__":
     conn = open_connection()
+    # PLAYER DATA
     # execute_statement(pq.drop_query, conn)
     # execute_statement(pq.create_query, conn)
     # execute_statement(pq.create_index, conn)
     # execute_statement(pq.create_date_index, conn)
     # execute_statement(pq.create_club_index, conn)
 
-    # execute_statement(mq.drop_query, conn)
-    # execute_statement(mq.create_query, conn)
-    # execute_statement(mq.create_index, conn)
+    execute_statement(mq.drop_query, conn)
+    execute_statement(mq.create_query, conn)
+    execute_statement(mq.create_index, conn)
 
-    # execute_statement(q.drop_odds_table, conn)
-    # execute_statement(q.create_odds_table, conn)
+    execute_statement(q.drop_odds_table, conn)
+    execute_statement(q.create_odds_table, conn)
 
-    # execute_statement(q.drop_division_table, conn)
-    # execute_statement(q.create_division_table, conn)
+    execute_statement(q.drop_division_table, conn)
+    execute_statement(q.create_division_table, conn)
 
-    # execute_statement(q.drop_season_table, conn)
-    # execute_statement(q.create_season_table, conn)
+    execute_statement(q.drop_season_table, conn)
+    execute_statement(q.create_season_table, conn)
 
     execute_statement(q.drop_elo_table, conn)
     execute_statement(q.create_elo_table, conn)
