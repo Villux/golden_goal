@@ -43,6 +43,9 @@ class DataLoader():
         df["outcome"] = -1
         return df
 
+    def set_feature_columns(self, features):
+        self.feature_columns = features
+
     def balance_home_wins(self, df):
         _, counts = np.unique(df["outcome"].values, return_counts=True)
         frac = np.around(1 - ((counts[0] + counts[2]) / 2)/counts[2], 2)
