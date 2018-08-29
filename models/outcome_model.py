@@ -13,7 +13,7 @@ def run_grid_search(grid, data_loader):
     tuning = GridSearchCV(
         estimator=RandomForestClassifier(oob_score=True, bootstrap=True, n_jobs=-1),
         param_grid=grid,
-        scoring='accuracy',
+        scoring='neg_log_loss',
         cv=5)
     tuning.fit(X, y)
 
