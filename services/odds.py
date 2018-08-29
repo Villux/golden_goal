@@ -39,3 +39,10 @@ def insert_odds_for_match(record, match_id, conn):
             })
     for odd in odds:
         ot.insert(conn, **odd)
+
+def get_implied_probabilities(odds):
+    implied_probabilities = []
+    for (home, draw, away) in odds:
+        overness = 1/home + 1/draw + 1/away
+        implied_probabilities.append([1/(overness*home), 1/(overness*draw), 1/(overness*away)])
+    return implied_probabilities
