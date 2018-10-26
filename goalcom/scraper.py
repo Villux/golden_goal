@@ -20,7 +20,7 @@ def add_lineup_to_match_link(links):
 
 def get_lineup_for_match(args):
     match_link, match_id = args
-    logging.info(f"Requesting page {url}{match_link}{match_id}")
+    logging.debug(f"Requesting page {url}{match_link}{match_id}")
     page = requests.get(url + match_link + match_id, timeout=TIMEOUT)
     bs = BeautifulSoup(page.text, 'html.parser')
     lineup = get_lineup(bs)
