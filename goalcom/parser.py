@@ -10,13 +10,18 @@ def get_match_links_for_league(bs, league_id):
     return match_links
 
 def get_players(lineup):
-    player_elems = lineup.ul.findAll("li")
-    return [
-        {
-            "url_id": player.a["href"],
-            "name": player.findAll('span', {'class': 'widget-match-lineups__name'})[0].get_text()
-        } for player in player_elems
-    ]
+    lineup_type = lineup.h2.get_text()
+    data_list = []
+    if lineup_type != "Manager":
+        player_elems = lineup.ul.findAll("li")
+        for player in player_elems:
+            data_list.append(
+                {
+                    "url_id": player.a["href"],
+                    "name": player.findAll('span', {'class': 'widget-match-lineups__name'})[0].get_text()
+                }
+            )
+    return data_list
 
 def get_team_name_from_lineup(lineup, home=True):
     team_label = "home" if home else "away"
