@@ -102,3 +102,14 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Exclude img folder
+img/
+
+# Exclude database
+database.db
+master_data.csv
+lineups/*
+
+# OSX shit
+.DS_Store
