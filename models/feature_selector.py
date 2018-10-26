@@ -1,9 +1,9 @@
-import pickle
 import numpy as np
 from sklearn.metrics import accuracy_score, log_loss
 import matplotlib.pyplot as plt
 
-from models.utils import get_feature_importance
+from models.model_utils import get_feature_importance
+from utils import write_as_json
 
 def run(model, data_loader, original_features, n_iter):
     feature_set = original_features.copy()
@@ -73,7 +73,7 @@ def store_results(avg_accuracies, avg_log_loss, removed_features, prefix):
         "removed_features": removed_features
     }
 
-    pickle.dump(open(f"img/{prefix}_feature_selection.pickle", "w"), data)
+    write_as_json(data, f"img/meta/{prefix}_feature_selection")
 
 if __name__ == "__main__":
     from models.outcome_model import get_model, get_default_param
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     dl = DataLoader(feature_columns, "outcome")
     clf = get_model(get_default_param())
 
-    accuracy, log_loss, remove_feat = run(clf, dl, feature_columns, 100)
+    accuracy, log_loss, remove_feat = run(clf, dl, feature_columns, 1)
     pdb.set_trace()
     store_results(accuracy, log_loss, remove_feat, "outcome_model")
     plot_feature_selection(accuracy, log_loss, remove_feat, "outcome_model")
