@@ -1,5 +1,6 @@
 import time
 import json
+import random
 from multiprocessing import Pool, cpu_count
 import requests
 from bs4 import BeautifulSoup
@@ -8,6 +9,7 @@ from logger import get_logger
 from goalcom.parser import get_match_links_for_league, get_lineup
 
 TIMEOUT = 10
+SLEEP = 5
 
 match_ids = []
 
@@ -20,6 +22,7 @@ def add_lineup_to_match_link(links):
 
 def get_lineup_for_match(args):
     match_link, match_id = args
+    time.sleep(random.random() * SLEEP)
     logging.debug(f"Requesting page {url}{match_link}{match_id}")
     page = requests.get(url + match_link + match_id, timeout=TIMEOUT)
     bs = BeautifulSoup(page.text, 'html.parser')
