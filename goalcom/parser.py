@@ -18,7 +18,8 @@ def get_players(lineup):
             data_list.append(
                 {
                     "url_id": player.a["href"],
-                    "name": player.findAll('span', {'class': 'widget-match-lineups__name'})[0].get_text()
+                    "name": player.findAll('span', {'class': 'widget-match-lineups__name'})[0].get_text(),
+                    "lineup_type": lineup_type.replace(" ", "").lower()
                 }
             )
     return data_list
