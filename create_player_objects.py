@@ -20,6 +20,6 @@ def main(conn):
         conn.commit()
 
 if __name__ == '__main__':
-    conn = open_connection()
-    main(conn)
-    close_connection(conn)
+    db_conn = open_connection()
+    main(db_conn)
+    close_connection(db_conn)
