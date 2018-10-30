@@ -3,6 +3,7 @@ import numpy as np
 from db import match_table as mt
 from services.odds import insert_odds_for_match
 from services.utils import map_team_names
+from utils import remove_extra_keys
 
 HOME = 1
 AWAY = 2
@@ -19,21 +20,13 @@ def merge_dataset_get_n(home_df, away_df, N, sort_col="date", asc=False):
 def get_id_for_row(row):
     return mt.get_index(row['HomeTeam'], row['AwayTeam'], row["Date"])
 
-def remove_extra_keys(record):
-    new_dict = {}
-    for valid_key in mt.VALID_KEYS:
-        value = record.get(valid_key, None)
-        if value:
-            new_dict[valid_key] = value
-    return new_dict
-
 def insert_matches(df, season_id, **kwargs):
     conn = kwargs["conn"]
     for _, record in df.to_dict('index').items():
         record["season_id"] = season_id
         record["HomeTeam"] = map_team_names(record["HomeTeam"])
         record["AwayTeam"] = map_team_names(record["AwayTeam"])
-        match_id = mt.insert(conn=conn, **remove_extra_keys(record))
+        match_id = mt.insert(conn=conn, **remove_extra_keys(record, mt.VALID_KEYS))
         insert_odds_for_match(record, match_id, conn)
 
 def calculate_goal_average(team, date, N, **kwargs):
