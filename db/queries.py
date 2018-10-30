@@ -130,4 +130,4 @@ create_player_identity_table = '''CREATE TABLE player_identity_table
 
 drop_player_identity_table = "DROP TABLE IF EXISTS player_identity_table;"
 
-create_fifa_id_index = "CREATE INDEX fifa_id_index ON player_identity_table (fifa_id);"
+create_fifa_id_index = "CREATE INDEX pit_fifa_id_index ON player_identity_table (fifa_id);"
