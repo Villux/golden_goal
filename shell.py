@@ -5,13 +5,6 @@ import pandas as pd
 from db.interface import open_connection, fetchall, close_connection, execute_statement
 from db import match_table as mt
 from db import queries as q
-from simulation.season_simulator import SeasonSimulator
-from simulation.predictor import OutcomePredictor
-from simulation.utils import plot_simulation, plot_probabilities_against_market
-from services.data_provider import DataLoader, feature_columns
-from services.player import calculate_player_features_for_team
-from models.outcome_model import get_model, get_default_param
-from services.odds import get_implied_probabilities
 
 
 conn = open_connection()
