@@ -25,3 +25,11 @@ def get_last_data_date(date, **kwargs):
 def get_data_for_team(team, date, **kwargs):
     query = f"select * from player_table where date='{date}' and club='{team}';"
     return pd.read_sql(query, kwargs["conn"])
+
+def get_latest_by_fifa_id(fifa_id, **kwargs):
+    query = f"select * from player_table where fifa_id='{fifa_id}' order by date desc limit 1;"
+    return pd.read_sql(query, kwargs["conn"])
+
+def players_between_dates_for_team(team, date, year_lag, **kwargs):
+    query = f"select * from player_table where date > date('{date}','-{year_lag} year') and date <= '{date}' and club='{team}' group by name;"
+    return pd.read_sql(query, kwargs["conn"])
