@@ -2,7 +2,7 @@ import hashlib
 import pandas as pd
 
 from db import helper as dbh
-from db.interface import fetchall
+from db.interface import fetchall, fetchone
 
 table_name = 'match_table'
 
@@ -49,3 +49,8 @@ def get_matches_for_seasons(seasons, **kwargs):
 def get_teams_for_season(season_id, **kwargs):
     query = f"select distinct(HomeTeam) from match_table where season_id={season_id};"
     return fetchall(query, conn=kwargs["conn"])
+
+def get_id_for_game(home_team, away_team, date, **kwargs):
+    query = f"select id from match_table where HomeTeam='{home_team}' and AwayTeam='{away_team}' and Date='{date}';"
+    return fetchone(query, kwargs["conn"])
+
