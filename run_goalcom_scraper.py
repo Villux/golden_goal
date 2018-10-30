@@ -15,7 +15,10 @@ dates = read_dates()
 
 query_dates = []
 for date in dates:
-    if time.strptime(date, "%Y-%m-%d") >= time.strptime(args.d, "%Y-%m-%d"):
+    if args.d:
+        if time.strptime(date, "%Y-%m-%d") >= time.strptime(args.d, "%Y-%m-%d"):
+            query_dates.append(date)
+    else:
         query_dates.append(date)
 
 goalcom.run(query_dates)
