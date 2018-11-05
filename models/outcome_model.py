@@ -1,8 +1,6 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 
-from services.data_provider import DataLoader, feature_columns
-
 def get_default_param():
     return {'max_depth': 5, 'max_features': 'log2', 'min_samples_leaf': 1,
             'n_estimators': 2000, "oob_score": True, "bootstrap": True, "n_jobs": -1}
@@ -14,6 +12,7 @@ def run_grid_search(grid, data_loader):
         estimator=RandomForestClassifier(oob_score=True, bootstrap=True, n_jobs=-1),
         param_grid=grid,
         scoring='neg_log_loss',
+        n_jobs=-1,
         cv=5)
     tuning.fit(X, y)
 
@@ -35,10 +34,11 @@ def get_model(params, X=None, y=None):
     return model
 
 if __name__ == "__main__":
+    from services.data_provider import DataLoader, feature_columns
     param_grid = {
-        'max_depth': [5],
-        'min_samples_leaf': [10, 15, 20, 25, 30, 40, 50],
-        'max_features': ["sqrt"],
+        'max_depth': [3, 5, 8, 12, None],
+        'min_samples_leaf': [1, 3, 5, 10, 15],
+        'max_features': ["sqrt", "log2"],
         'n_estimators': [2000]
     }
     dl = DataLoader(feature_columns, "outcome")
