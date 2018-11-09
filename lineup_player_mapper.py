@@ -1,83 +1,38 @@
 import json
 import glob
-from fuzzywuzzy import fuzz
 
-from db import player_table as pt
 from db import player_identity_table as pit
 from db import match_table as mt
 from db import lineup_table as lt
 from db.interface import open_connection, close_connection
 from logger import logging
-from utils import remove_extra_keys, unicode_to_ascii
 
 conn = open_connection()
 
-def get_players_for_team(team, date):
-    return pt.players_between_dates_for_team(team, date, 1, conn=conn)
-
-def get_goalcom_lastname(name):
-    name = name.strip()
-    if " " in name:
-        _, last_name = name.rsplit(' ', 1)
-        return last_name
-    return name
-
-def merge_goalcom_and_fifa(player_dict, goalcom_data):
-    player_dict["goalcom_url"] = goalcom_data["url_id"]
-    player_dict["goalcom_name"] = goalcom_data["name"]
-    player_dict["lineup_type"] = goalcom_data["lineup_type"]
-    return player_dict
-
-def get_partial_fuzzy_score(value, name):
-    return fuzz.partial_ratio(name, value)
-
-def get_fuzzy_score(value, name):
-    return fuzz.ratio(name, value)
-
-def update_pit_and_get_lineup_data(player):
-    fifa_id = player["fifa_id"]
-    player.pop('fifa_id', None)
-    pit.update_by_fifa_id(fifa_id, conn, **remove_extra_keys(player, pit.VALID_KEYS))
-    pit_df = pit.get_by_fifa_id(fifa_id, conn=conn)
-    player_dict = pit_df.iloc[0, :].to_dict()
-    return {"lineup_type": player["lineup_type"], "id": player_dict["id"]}
-
-def map_players_for_team(player_df, lineup_players):
-    player_df["name"] = player_df["name"].apply(unicode_to_ascii)
-    players_dirty = [map_goalcom_to_fifa(player_df, lineup_player) for lineup_player in lineup_players]
-    players = [player for player in players_dirty if player]
-
-    return [update_pit_and_get_lineup_data(player) for player in players]
-
-def map_goalcom_to_fifa(player_df, player):
-    player_name = unicode_to_ascii(player["name"])
-    last_name = get_goalcom_lastname(player_name)
-    player_df["partial_score"] = player_df["name"].apply(get_partial_fuzzy_score, args=(last_name,))
-    player_df["score"] = player_df["name"].apply(get_fuzzy_score, args=(player_name,))
-
-    valid_players = player_df[player_df["partial_score"] > 55]
-    if valid_players.shape[0] == 0:
-        logging.warning(f'No match for name {player["name"]}')
-        return None
-
-    max_score = max(valid_players["partial_score"].values)
-    maximum_score_df = player_df[player_df["partial_score"] == max_score]
-
-    return merge_goalcom_and_fifa(maximum_score_df.loc[maximum_score_df["score"].idxmax()].to_dict(), player)
+def attach_ids_to_players(players):
+    valid_players = []
+    for player in players:
+        ret = pit.get_id_by_goalcom_url(player["url_id"], conn=conn)
+        if ret:
+            player["id"] = ret[0]
+            valid_players.append(player)
+        else:
+            logging.warning(f"No player for goalcom player url {player['url_id']}")
+    return valid_players
 
 def map_lineup_with_player_data(lineup):
-    date = lineup["date"]
+    home_team_players = attach_ids_to_players(lineup["home_team_players"])
+    away_team_players = attach_ids_to_players(lineup["away_team_players"])
+
     home_team = lineup["home_team"]
-    ht_df = get_players_for_team(home_team, date)
-    home_team_players = map_players_for_team(ht_df, lineup["home_team_players"])
-
     away_team = lineup["away_team"]
-    at_df = get_players_for_team(away_team, date)
-    away_team_players = map_players_for_team(at_df, lineup["away_team_players"])
-
+    date = lineup["date"]
     match_id_tuple = mt.get_id_for_game(home_team, away_team, date, conn=conn)
 
-    store_lineups(match_id_tuple[0], home_team_players, away_team_players)
+    if not match_id_tuple:
+        logging.warning(f'No match for {lineup["home_team"]} vs. {lineup["away_team"]} {date}')
+    else:
+        store_lineups(match_id_tuple[0], home_team_players, away_team_players)
 
 def store_lineups(match_id, home_team_players, away_team_players):
     ht_open = [player["id"] for player in home_team_players if player["lineup_type"] == "lineup"]
@@ -99,7 +54,9 @@ def handle_lineupdate(lineup_data):
 
 def run(path="lineups/*.json"):
     lineup_files = glob.glob(path)
-    for lineup_file in lineup_files:
+    number_of_lineups = len(lineup_files)
+    for idx, lineup_file in enumerate(lineup_files):
+        logging.info(f"PROCESSING LINEUP {idx+1}/{number_of_lineups}")
         with open(lineup_file, "rb") as lf:
             for line in lf.readlines():
                 lineup_data = json.loads(line)
