@@ -17,9 +17,6 @@ def merge_dataset_get_n(home_df, away_df, N, sort_col="date", asc=False):
     matches = matches.sort_values(by=sort_col, ascending=asc)
     return matches.iloc[0:N, :]
 
-def get_id_for_row(row):
-    return mt.get_index(row['HomeTeam'], row['AwayTeam'], row["Date"])
-
 def insert_matches(df, season_id, **kwargs):
     conn = kwargs["conn"]
     for _, record in df.to_dict('index').items():
