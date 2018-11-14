@@ -8,9 +8,8 @@ def write_as_json(data, filename):
 def remove_extra_keys(record, valid_keys):
     new_dict = {}
     for valid_key in valid_keys:
-        value = record.get(valid_key, None)
-        if value:
-            new_dict[valid_key] = value
+        if valid_key in record:
+            new_dict[valid_key] = record[valid_key]
     return new_dict
 
 def unicode_to_ascii(value):
