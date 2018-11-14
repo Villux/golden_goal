@@ -14,6 +14,21 @@ feature_columns = ["acceleration", "age", "aggression", "agility", "balance", "b
                 "skill_moves", "sliding_tackle", "sprint_speed", "stamina", "standing_tackle", "strength",
                 "vision", "volleys", "xg", "goal_mean", "elo"]
 
+def create_match_feature_vector(match, N=20, **kwargs):
+    data_merge_obj = {"HomeTeam": match["HomeTeam"], "AwayTeam": match["AwayTeam"], "Date": match["Date"], "id": match["id"]}
+
+    data_merge_obj["home_elo"] = elo.get_elo_and_id(match["HomeTeam"], match["Date"], match["season_id"], **kwargs)[0]
+    data_merge_obj["home_xg"] = ms.calculate_xg(match["HomeTeam"], match["Date"], N, combination=ms.HOMEAWAY, **kwargs)
+    data_merge_obj["home_goal_mean"] = ms.calculate_goal_average(match["HomeTeam"], match["Date"], N, **kwargs)
+
+    data_merge_obj["away_elo"] = elo.get_elo_and_id(match["AwayTeam"], match["Date"], match["season_id"], **kwargs)[0]
+    data_merge_obj["away_xg"] = ms.calculate_xg(match["AwayTeam"], match["Date"], N, combination=ms.HOMEAWAY, **kwargs)
+    data_merge_obj["away_goal_mean"] = ms.calculate_goal_average(match["AwayTeam"], match["Date"], N, **kwargs)
+
+    home, away = player.get_team_features_for_matches(match["id"], match["Date"], **kwargs)
+
+    return {**data_merge_obj, **home, **away}
+
 class DataLoader():
     def __init__(self, features, label, filter_season=[], path="master_data.csv"):
         self.feature_columns = features
@@ -85,21 +100,8 @@ class DataLoader():
         return X, y
 
     def get_match_feature_vector(self, match, **kwargs):
-        data_merge_obj = {"HomeTeam": match["HomeTeam"], "AwayTeam": match["AwayTeam"], "Date": match["Date"], "id": match["id"]}
-
-        N = 20
-        data_merge_obj["home_elo"] = elo.get_elo_and_id(match["HomeTeam"], match["Date"], match["season_id"], **kwargs)[0]
-        data_merge_obj["home_xg"] = ms.calculate_xg(match["HomeTeam"], match["Date"], N, combination=ms.HOMEAWAY, **kwargs)
-        data_merge_obj["home_goal_mean"] = ms.calculate_goal_average(match["HomeTeam"], match["Date"], N, **kwargs)
-
-        data_merge_obj["away_elo"] = elo.get_elo_and_id(match["AwayTeam"], match["Date"], match["season_id"], **kwargs)[0]
-        data_merge_obj["away_xg"] = ms.calculate_xg(match["AwayTeam"], match["Date"], N, combination=ms.HOMEAWAY, **kwargs)
-        data_merge_obj["away_goal_mean"] = ms.calculate_goal_average(match["AwayTeam"], match["Date"], N, **kwargs)
-
-        home, away = player.get_team_features_for_matches(match["HomeTeam"], match["AwayTeam"], match["Date"], **kwargs)
-
-        data_merge_obj = {**data_merge_obj, **home, **away}
-        return self.get_feature_matrix(pd.DataFrame([data_merge_obj]))
+        feature_vector = create_match_feature_vector(match, **kwargs)
+        return self.get_feature_matrix(pd.DataFrame([feature_vector]))
 
     def get_odds_for_matches(self, matches, **kwargs):
         output = []
