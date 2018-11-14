@@ -1,4 +1,3 @@
-import hashlib
 import pandas as pd
 
 from db import helper as dbh
@@ -9,10 +8,6 @@ table_name = 'match_table'
 VALID_KEYS = ["id", "season_id", "Date","HomeTeam","AwayTeam","FTHG","FTAG","FTR","HTHG","HTAG",
               "HTR","Referee","Home_Team_Shots","Away_Team_Shots","HST","AST","HF","AF",
               "HC","AC","HY","AY","HR","AR","Attendance","HHW","AHW","HO","AO","HBP","ABP"]
-
-def get_index(home_team, away_team, date):
-    id_string = f"{home_team}{away_team}{date}".encode()
-    return hashlib.md5(id_string).hexdigest()
 
 def get_matches_between_dates(team, start, end, conn):
     query = f"select * \
@@ -42,6 +37,10 @@ def get_matches(asc=True, **kwargs):
     query = f"SELECT * FROM match_table order by date {'asc' if asc else 'desc'};"
     return pd.read_sql(query, kwargs["conn"])
 
+def get_match(match_id, **kwargs):
+    query = f"SELECT * FROM match_table where id={match_id};"
+    return pd.read_sql(query, kwargs["conn"])
+
 def get_matches_for_seasons(seasons, **kwargs):
     query = f"SELECT * FROM match_table where season_id IN ({','.join(str(idd) for idd in seasons)});"
     return pd.read_sql(query, kwargs["conn"])
@@ -54,3 +53,6 @@ def get_id_for_game(home_team, away_team, date, **kwargs):
     query = f"select id from match_table where HomeTeam='{home_team}' and AwayTeam='{away_team}' and Date='{date}';"
     return fetchone(query, kwargs["conn"])
 
+def get_matches_for_division(division_id, date, **kwargs):
+    query = f"select mt.* from match_table as mt join season_table as st on mt.season_id=st.id join division_table as dt on dt.id=st.division_id where dt.id={division_id} and mt.Date>'{date}'"
+    return pd.read_sql(query, kwargs["conn"])
