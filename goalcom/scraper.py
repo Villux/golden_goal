@@ -33,11 +33,11 @@ def get_lineup_for_match(args):
 
 logging = get_logger()
 
-number_of_cores = cpu_count() * 4
+number_of_threads = cpu_count() * 4
 url = "https://www.goal.com"
 league_id = "2kwbbcootiqqgmrzs6o5inle5"
 
-pool = Pool(number_of_cores)
+pool = Pool(number_of_threads)
 
 def run(dates):
     logging.debug(f'Got {len(dates)} dates')
