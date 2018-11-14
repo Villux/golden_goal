@@ -31,7 +31,7 @@ def get_team_name_from_lineup(lineup, home=True):
 
 def get_lineup(bs):
     team_a = bs.findAll('div', {'class': "widget-match-lineups__team-a"})
-    team_b = bs.findAll('div', {'class': "widget-match-lineups__team widget-match-lineups__team-b widget-match-lineups__team--hidden"})
+    team_b = bs.findAll('div', {'class': "widget-match-lineups__team-b"})
 
     data = {}
     data["home_team"] = get_team_name_from_lineup(bs, home=True)
