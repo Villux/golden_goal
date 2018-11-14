@@ -9,20 +9,23 @@ from logger import logging
 
 conn = open_connection()
 
+missing_players = []
+
 def attach_ids_to_players(players):
     valid_players = []
     for player in players:
         ret = pit.get_id_by_goalcom_url(player["url_id"], conn=conn)
         if ret:
-            player["id"] = ret[0]
+            player["fifa_id"] = ret[0]
             valid_players.append(player)
         else:
             logging.warning(f"No player for goalcom player url {player['url_id']}")
+            missing_players.append(player)
     return valid_players
 
 def map_lineup_with_player_data(lineup):
-    home_team_players = attach_ids_to_players(lineup["home_team_players"])
-    away_team_players = attach_ids_to_players(lineup["away_team_players"])
+    home_team_players = attach_ids_to_players(lineup["home_team_players"] + lineup["home_team_substitutes"])
+    away_team_players = attach_ids_to_players(lineup["away_team_players"] + lineup["away_team_substitutes"])
 
     home_team = lineup["home_team"]
     away_team = lineup["away_team"]
@@ -35,14 +38,14 @@ def map_lineup_with_player_data(lineup):
         store_lineups(match_id_tuple[0], home_team_players, away_team_players)
 
 def store_lineups(match_id, home_team_players, away_team_players):
-    ht_open = [player["id"] for player in home_team_players if player["lineup_type"] == "lineup"]
-    ht_subs = [player["id"] for player in home_team_players if player["lineup_type"] == "substitutes"]
+    ht_open = [player["fifa_id"] for player in home_team_players if player["lineup_type"] == "lineup"]
+    ht_subs = [player["fifa_id"] for player in home_team_players if player["lineup_type"] == "substitutes"]
 
-    at_open = [player["id"] for player in away_team_players if player["lineup_type"] == "lineup"]
-    at_subs = [player["id"] for player in away_team_players if player["lineup_type"] == "substitutes"]
+    at_open = [player["fifa_id"] for player in away_team_players if player["lineup_type"] == "lineup"]
+    at_subs = [player["fifa_id"] for player in away_team_players if player["lineup_type"] == "substitutes"]
 
     lineup = lt.get_by_match_id(match_id, conn=conn)
-    if lineup:
+    if lineup.shape[0]:
         lt.update(match_id, [ht_open, ht_subs, at_open, at_subs], conn)
     else:
         lt.insert_player_for_match([ht_open, ht_subs, at_open, at_subs], match_id, conn=conn)
@@ -64,4 +67,8 @@ def run(path="lineups/*.json"):
 
 if __name__ == '__main__':
     run()
+    import pandas as pd
+    data = pd.DataFrame(missing_players)
+    data = data.drop_duplicates("url_id")
+    data.to_csv("missing_substitutes.csv")
     close_connection(conn)
