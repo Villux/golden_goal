@@ -122,11 +122,10 @@ drop_lineup_table = "DROP TABLE IF EXISTS lineup_table;"
 create_match_id_index = "CREATE INDEX match_id_index ON lineup_table (match_id);"
 
 create_player_identity_table = '''CREATE TABLE player_identity_table
-                    (id integer PRIMARY KEY AUTOINCREMENT,
-                    fifa_name text,
+                    (fifa_name text,
                     goalcom_name text,
-                    fifa_id INTEGER UNIQUE,
-                    goalcom_url text UNIQUE);'''
+                    fifa_id INTEGER PRIMARY KEY,
+                    goalcom_url text);'''
 
 drop_player_identity_table = "DROP TABLE IF EXISTS player_identity_table;"
 
