@@ -21,7 +21,7 @@ def insert_player_for_match(player_sets, match_id, **kwargs):
 
 def get_by_match_id(match_id, **kwargs):
     query = f"select * from lineup_table where match_id={match_id}"
-    return fetchone(query, kwargs["conn"])
+    return pd.read_sql(query, kwargs["conn"])
 
 def update(match_id, player_sets, conn):
     data = build_lineup_object(player_sets, match_id)
