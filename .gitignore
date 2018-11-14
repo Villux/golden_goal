@@ -110,6 +110,7 @@ img/
 database.db
 master_data.csv
 lineups/*
+tmp_data/*
 
 # OSX shit
 .DS_Store
