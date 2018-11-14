@@ -1,12 +1,13 @@
 import numpy as np
 
 from db import player_table as pt
+from db import lineup_table as lt
 from logger import logging
 
-TOP = 5
-HALF =  8
-FIELD =  15
-GK = 2
+TOP = 4
+HALF =  5
+FIELD =  11
+GK = 1
 ALL = 25
 
 field_list = [("acceleration", TOP, None), ("age", FIELD, "overall_rating"), ("aggression", TOP, None), ("agility", TOP, None),
@@ -51,21 +52,35 @@ def calculate_team_average(df):
             record[field] = None
     return record
 
-def calculate_player_features_for_team(team, date, **kwargs):
+def calculate_player_features_for_team(player_ids, date, **kwargs):
     dd_tuple = pt.get_last_data_date(date, **kwargs)
     if dd_tuple:
         data_date = dd_tuple[0]
-        logging.debug(f"Calculating team features for date {data_date} and team {team}")
-        player_data = pt.get_data_for_team(team, data_date, **kwargs)
+        player_data = pt.get_data_for_player_ids(player_ids, data_date, **kwargs)
         record = calculate_team_average(player_data)
     else:
         record = {}
-
     return record
 
-def get_team_features_for_matches(home_team, away_team, date, **kwargs):
-    home_features = calculate_player_features_for_team(home_team, date, **kwargs)
+def get_team_features_for_matches(match_id, date, **kwargs):
+    lineup = lt.get_by_match_id(match_id, **kwargs)
+    if not lineup.shape[0]:
+        return {}, {}
+
+    home_players = lineup.loc[:, lineup.columns.str.startswith('hp')].values[0]
+    home_subst = lineup.loc[:, lineup.columns.str.startswith('hs')].values[0]
+    home_fifa_ids = [player for player in np.concatenate((home_players, home_subst)) if player]
+    home_features = calculate_player_features_for_team(home_fifa_ids, date, **kwargs)
+    if home_features["gk_handling"] < 60:
+        logging.warning(f"No goalkeeper in home team's lineup!! Match id: {match_id}")
     home_features = {f'home_{k}': v for k, v in home_features.items()}
-    away_features = calculate_player_features_for_team(away_team, date, **kwargs)
+
+    away_players = lineup.loc[:, lineup.columns.str.startswith('ap')].values[0]
+    away_subst = lineup.loc[:, lineup.columns.str.startswith('as')].values[0]
+    away_fifa_ids = [player for player in np.concatenate((away_players, away_subst)) if player]
+    away_features = calculate_player_features_for_team(away_fifa_ids, date, **kwargs)
+    if away_features["gk_handling"] < 60:
+        logging.warning(f"No goalkeeper in away team's lineup!! Match id: {match_id}")
     away_features = {f'away_{k}': v for k, v in away_features.items()}
+
     return home_features, away_features
