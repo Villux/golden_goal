@@ -10,9 +10,16 @@ from logger import logging
 conn = open_connection()
 
 missing_players = []
+missing_match_urls = []
+
+def add_invalid_players_to_missing(player, date, team):
+    player["team"] = team
+    player["date"] = date
+    missing_players.append(player)
 
 def attach_ids_to_players(players):
     valid_players = []
+    invalid_players = []
     for player in players:
         ret = pit.get_id_by_goalcom_url(player["url_id"], conn=conn)
         if ret:
@@ -20,20 +27,26 @@ def attach_ids_to_players(players):
             valid_players.append(player)
         else:
             logging.warning(f"No player for goalcom player url {player['url_id']}")
-            missing_players.append(player)
-    return valid_players
+            invalid_players.append(player)
+    return valid_players, invalid_players
 
 def map_lineup_with_player_data(lineup):
-    home_team_players = attach_ids_to_players(lineup["home_team_players"] + lineup["home_team_substitutes"])
-    away_team_players = attach_ids_to_players(lineup["away_team_players"] + lineup["away_team_substitutes"])
-
     home_team = lineup["home_team"]
     away_team = lineup["away_team"]
     date = lineup["date"]
+
+    home_team_players, home_invalid_players = attach_ids_to_players(lineup["home_team_players"] + lineup["home_team_substitutes"])
+    for home_invalid_player in home_invalid_players:
+        add_invalid_players_to_missing(home_invalid_player, date, home_team)
+    away_team_players, away_invalid_players = attach_ids_to_players(lineup["away_team_players"] + lineup["away_team_substitutes"])
+    for away_invalid_player in away_invalid_players:
+        add_invalid_players_to_missing(away_invalid_player, date, away_team)
+
     match_id_tuple = mt.get_id_for_game(home_team, away_team, date, conn=conn)
 
     if not match_id_tuple:
         logging.warning(f'No match for {lineup["home_team"]} vs. {lineup["away_team"]} {date}')
+        missing_match_urls.append(lineup.get("match_link", None) + lineup.get("match_id", None))
     else:
         store_lineups(match_id_tuple[0], home_team_players, away_team_players)
 
@@ -67,8 +80,14 @@ def run(path="lineups/*.json"):
 
 if __name__ == '__main__':
     run()
+
+    import pickle
     import pandas as pd
+
     data = pd.DataFrame(missing_players)
     data = data.drop_duplicates("url_id")
-    data.to_csv("missing_substitutes.csv")
+    data.to_csv("missing_players.csv")
+
+    with open('no_lineup.pickle', 'wb') as fp:
+        pickle.dump(missing_match_urls, fp)
     close_connection(conn)
