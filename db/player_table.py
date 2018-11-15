@@ -26,6 +26,11 @@ def get_data_for_team(team, date, **kwargs):
     query = f"select * from player_table where date='{date}' and club='{team}';"
     return pd.read_sql(query, kwargs["conn"])
 
+def get_data_for_player_ids(players_fifa_ids, date, **kwargs):
+    id_string = ",".join(str(elem) for elem in players_fifa_ids)
+    query = f"select * from player_table where date='{date}' and fifa_id IN ({id_string})"
+    return pd.read_sql(query, kwargs["conn"])
+
 def get_latest_by_fifa_id(fifa_id, **kwargs):
     query = f"select * from player_table where fifa_id='{fifa_id}' order by date desc limit 1;"
     return pd.read_sql(query, kwargs["conn"])
