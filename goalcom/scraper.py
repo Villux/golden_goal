@@ -28,6 +28,7 @@ def get_lineup_for_match(args):
     bs = BeautifulSoup(page.text, 'html.parser')
     lineup = get_lineup(bs)
     lineup["match_id"] = match_id
+    lineup["match_link"] = match_link
     bs.decompose()
     return lineup
 
