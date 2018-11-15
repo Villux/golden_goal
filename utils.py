@@ -14,3 +14,10 @@ def remove_extra_keys(record, valid_keys):
 
 def unicode_to_ascii(value):
     return unicodedata.normalize('NFD', value).encode('ascii', 'ignore').decode('ascii')
+
+def get_goalcom_lastname(name):
+    name = name.strip()
+    if " " in name:
+        _, last_name = name.rsplit(' ', 1)
+        return last_name
+    return name
